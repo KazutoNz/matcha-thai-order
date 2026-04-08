@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import UpsellPopup from '@/components/UpsellPopup';
 
 interface CartDrawerProps {
   open: boolean;
@@ -65,6 +66,9 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
           <SheetTitle>{checkout ? 'ชำระเงิน' : 'ตะกร้าสินค้า'}</SheetTitle>
         </SheetHeader>
 
+        {/* Mobile upsell popup */}
+        {!checkout && <UpsellPopup cartOpen={open} />}
+
         {checkout ? (
           <div className="flex flex-1 flex-col gap-4 overflow-y-auto py-4">
             <div className="space-y-2">
@@ -99,7 +103,7 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
               ) : (
                 <div className="flex flex-col gap-3">
                   {items.map((item) => (
-                    <div key={item.id} className="flex gap-3 rounded-lg border p-3">
+                    <div key={item.id} className="flex gap-3 rounded-lg border p-3 animate-slide-up">
                       <img
                         src={item.image}
                         alt={item.name}
