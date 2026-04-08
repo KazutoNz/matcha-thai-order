@@ -37,13 +37,26 @@ interface CartState {
 
 let counter = 0;
 
+// Simple event emitter for cart add animations
+type CartListener = () => void;
+const cartAddListeners: CartListener[] = [];
+export const onCartAdd = (fn: CartListener) => {
+  cartAddListeners.push(fn);
+  return () => {
+    const idx = cartAddListeners.indexOf(fn);
+    if (idx >= 0) cartAddListeners.splice(idx, 1);
+  };
+};
+
 export const useCartStore = create<CartState>((set, get) => ({
   items: [],
   orders: [],
-  addItem: (item) =>
+  addItem: (item) => {
     set((state) => ({
       items: [...state.items, { ...item, id: `item-${++counter}` }],
-    })),
+    }));
+    cartAddListeners.forEach((fn) => fn());
+  },
   removeItem: (id) =>
     set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
   clearCart: () => set({ items: [] }),

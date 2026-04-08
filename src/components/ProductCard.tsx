@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button';
 interface ProductCardProps {
   product: Product;
   onClick: (product: Product) => void;
+  index: number;
 }
 
-const ProductCard = ({ product, onClick }: ProductCardProps) => {
+const ProductCard = ({ product, onClick, index }: ProductCardProps) => {
   return (
     <Card
-      className="group cursor-pointer overflow-hidden transition-shadow hover:shadow-lg"
+      className="group cursor-pointer overflow-hidden transition-shadow hover:shadow-lg animate-bounce-in"
+      style={{ animationDelay: `${index * 0.1}s` }}
       onClick={() => onClick(product)}
     >
       <div className="aspect-square overflow-hidden bg-muted">
