@@ -13,7 +13,15 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['"Noto Sans Thai"', 'sans-serif'],
+        display: ['"Playfair Display"', 'serif'],
+      },
       colors: {
+        matcha: {
+          light: "hsl(var(--matcha-light))",
+          medium: "hsl(var(--matcha-medium))",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
