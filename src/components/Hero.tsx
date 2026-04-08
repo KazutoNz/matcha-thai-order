@@ -1,3 +1,4 @@
+import { Cat } from 'lucide-react';
 import heroImage from '@/assets/hero-matcha.jpg';
 import { Button } from '@/components/ui/button';
 
@@ -19,8 +20,9 @@ const Hero = ({ onExplore }: HeroProps) => {
         <div className="absolute inset-0 bg-foreground/40" />
       </div>
       <div className="container relative flex min-h-[420px] flex-col items-center justify-center gap-6 py-20 text-center">
-        <h1 className="font-display text-4xl font-bold tracking-tight text-primary-foreground md:text-6xl">
-          ยินดีต้อนรับสู่ MatchaWeb
+        <h1 className="flex flex-wrap items-center justify-center gap-3 font-display text-4xl font-bold tracking-tight text-primary-foreground md:gap-4 md:text-6xl">
+          <Cat className="h-10 w-10 shrink-0 md:h-16 md:w-16" aria-hidden />
+          <span>ยินดีต้อนรับสู่ MatchaMew</span>
         </h1>
         <p className="max-w-lg text-lg text-primary-foreground/90">
           เครื่องดื่มและขนมมัทฉะคุณภาพพรีเมียม สดใหม่ทุกวัน
