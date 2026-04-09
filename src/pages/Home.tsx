@@ -1,20 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
-import { Github, MapPin, MessageCircle, Phone } from 'lucide-react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { useOutletContext } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { Cat, Github, MapPin, MessageCircle, Phone } from 'lucide-react';
 import Hero from '@/components/Hero';
 import ProductCard from '@/components/ProductCard';
-import ProductModal from '@/components/ProductModal';
-import CartDrawer from '@/components/CartDrawer';
-import CartFAB from '@/components/CartFAB';
 import OrderStatusTracker from '@/components/OrderStatusTracker';
-import { products, type Product } from '@/lib/products';
+import { products } from '@/lib/products';
 import { useCartStore } from '@/lib/cart-store';
+import type { PublicOutletContext } from '@/layouts/PublicLayout';
 
-const Index = () => {
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [cartOpen, setCartOpen] = useState(false);
-  const gridRef = useRef<HTMLElement>(null);
+const bestSellers = products.slice(0, 3);
+
+const Home = () => {
+  const { openProduct } = useOutletContext<PublicOutletContext>();
   const orders = useCartStore((s) => s.orders);
   const latestOrder = orders.length > 0 ? orders[orders.length - 1] : null;
 
@@ -24,29 +21,33 @@ const Index = () => {
     return 0;
   };
 
-  useEffect(() => {
-    if (!window.location.hash) {
-      window.scrollTo(0, 0);
-    }
-  }, []);
-
   return (
-    <div className="min-h-screen">
-      <Navbar onCartClick={() => setCartOpen(true)} />
+    <>
       {latestOrder && (
         <OrderStatusTracker currentStep={statusToStep(latestOrder.status)} />
       )}
-      <Hero onExplore={() => gridRef.current?.scrollIntoView({ behavior: 'smooth' })} />
+      <Hero />
 
-      <section ref={gridRef} className="container py-16">
-        <h2 className="mb-8 text-center text-3xl font-bold">เมนูของเรา</h2>
+      {/* Best Sellers */}
+      <section className="container py-16">
+        <h2 className="mb-2 text-center text-3xl font-bold">สินค้าขายดี</h2>
+        <p className="mb-8 text-center text-muted-foreground">เมนูที่ลูกค้าชื่นชอบมากที่สุด</p>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((p, i) => (
-            <ProductCard key={p.id} product={p} onClick={setSelectedProduct} index={i} />
+          {bestSellers.map((p, i) => (
+            <ProductCard key={p.id} product={p} onClick={openProduct} index={i} />
           ))}
+        </div>
+        <div className="mt-8 text-center">
+          <Link
+            to="/menu"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            ดูเมนูทั้งหมด
+          </Link>
         </div>
       </section>
 
+      {/* About */}
       <section id="about" className="scroll-mt-20 border-t bg-muted/30 py-16">
         <div className="container max-w-3xl">
           <h2 className="mb-4 text-center text-3xl font-bold">เกี่ยวกับเรา</h2>
@@ -57,6 +58,7 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Contact */}
       <section id="contact" className="scroll-mt-20 py-16">
         <div className="container max-w-6xl">
           <h2 className="mb-8 text-center text-3xl font-bold">ติดต่อ / ช่องทาง</h2>
@@ -65,22 +67,18 @@ const Index = () => {
               <Phone className="h-5 w-5 shrink-0 text-primary" aria-hidden />
               <div className="min-w-0 flex-1">
                 <p className="font-medium">โทรศัพท์</p>
-                <a href="tel:0812345678" className="text-muted-foreground underline-offset-4 hover:underline">
-                  081-234-5678
-                </a>
+                <a href="tel:0812345678" className="text-muted-foreground underline-offset-4 hover:underline">081-234-5678</a>
               </div>
             </li>
             <li className="flex min-h-full flex-col gap-3 rounded-lg border bg-card p-4 sm:flex-row sm:items-start">
               <MessageCircle className="h-5 w-5 shrink-0 text-primary" aria-hidden />
               <div className="min-w-0 flex-1">
                 <p className="font-medium">LINE</p>
-                <p className="text-muted-foreground">@matchaweb (ตัวอย่าง — แก้เป็นไอดีจริงของร้านได้)</p>
+                <p className="text-muted-foreground">@matchaweb</p>
               </div>
             </li>
             <li className="flex min-h-full flex-col gap-3 rounded-lg border bg-card p-4 sm:flex-row sm:items-start">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center text-xs font-bold text-primary" aria-hidden>
-                FB
-              </span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center text-xs font-bold text-primary" aria-hidden>FB</span>
               <div className="min-w-0 flex-1">
                 <p className="font-medium">Facebook / Instagram</p>
                 <p className="text-muted-foreground">facebook.com/matchaweb · @matchaweb.th</p>
@@ -90,56 +88,29 @@ const Index = () => {
               <Github className="h-5 w-5 shrink-0 text-primary" aria-hidden />
               <div className="min-w-0 flex-1">
                 <p className="font-medium">GitHub</p>
-                <a
-                  href="https://github.com/KazutoNz/matcha-thai-order"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="break-all text-muted-foreground underline-offset-4 hover:underline"
-                >
-                  KazutoNz/matcha-thai-order
-                </a>
+                <a href="https://github.com/KazutoNz/matcha-thai-order" target="_blank" rel="noopener noreferrer" className="break-all text-muted-foreground underline-offset-4 hover:underline">KazutoNz/matcha-thai-order</a>
               </div>
             </li>
           </ul>
         </div>
       </section>
 
+      {/* Location */}
       <section id="location" className="scroll-mt-20 border-t bg-muted/30 py-16">
         <div className="container max-w-3xl">
           <h2 className="mb-6 text-center text-3xl font-bold">สถานที่ตั้ง</h2>
           <div className="flex flex-col gap-4 rounded-lg border bg-card p-6 sm:flex-row sm:items-start sm:gap-6">
             <MapPin className="h-8 w-8 shrink-0 text-primary" aria-hidden />
             <div className="space-y-2">
-              <p className="font-medium leading-relaxed">
-                123 ถนนตัวอย่าง แขวงตัวอย่าง เขตตัวอย่าง
-                <br />
-                กรุงเทพมหานคร 10110
-              </p>
-              <p className="text-sm text-muted-foreground">เปิดทุกวัน 10:00–20:00 น. (แก้เวลา/ที่อยู่ตามร้านจริงได้)</p>
-              <a
-                href="https://maps.google.com/?q=13.7563,100.5018"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex text-sm font-medium text-primary underline-offset-4 hover:underline"
-              >
-                เปิดใน Google Maps
-              </a>
+              <p className="font-medium leading-relaxed">123 ถนนตัวอย่าง แขวงตัวอย่าง เขตตัวอย่าง<br />กรุงเทพมหานคร 10110</p>
+              <p className="text-sm text-muted-foreground">เปิดทุกวัน 10:00–20:00 น.</p>
+              <a href="https://maps.google.com/?q=13.7563,100.5018" target="_blank" rel="noopener noreferrer" className="inline-flex text-sm font-medium text-primary underline-offset-4 hover:underline">เปิดใน Google Maps</a>
             </div>
           </div>
         </div>
       </section>
-
-      <Footer />
-
-      <ProductModal
-        product={selectedProduct}
-        open={!!selectedProduct}
-        onClose={() => setSelectedProduct(null)}
-      />
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
-      <CartFAB onClick={() => setCartOpen(true)} />
-    </div>
+    </>
   );
 };
 
-export default Index;
+export default Home;
