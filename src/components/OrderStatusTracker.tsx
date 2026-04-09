@@ -13,7 +13,7 @@ interface OrderStatusTrackerProps {
 
 const OrderStatusTracker = ({ currentStep = 0 }: OrderStatusTrackerProps) => {
   return (
-    <div className="block md:hidden w-full bg-secondary/60 backdrop-blur-sm border-b">
+    <div className="w-full bg-secondary/60 backdrop-blur-sm border-b">
       <div className="container flex items-center justify-between py-2 px-4">
         {steps.map((step, i) => {
           const Icon = step.icon;

@@ -1,12 +1,9 @@
 import { Cat } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import heroImage from '@/assets/hero-matcha.jpg';
 import { Button } from '@/components/ui/button';
 
-interface HeroProps {
-  onExplore: () => void;
-}
-
-const Hero = ({ onExplore }: HeroProps) => {
+const Hero = () => {
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0">
@@ -30,9 +27,9 @@ const Hero = ({ onExplore }: HeroProps) => {
         <Button
           size="lg"
           className="bg-primary text-primary-foreground hover:bg-primary/90"
-          onClick={onExplore}
+          asChild
         >
-          สำรวจเมนู
+          <Link to="/menu">สำรวจเมนู</Link>
         </Button>
       </div>
     </section>
