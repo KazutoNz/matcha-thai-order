@@ -1,8 +1,5 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Cat, Menu, ShoppingCart } from 'lucide-react';
-import { useCartStore, onCartAdd } from '@/lib/cart-store';
-import { Badge } from '@/components/ui/badge';
+import { Link, useLocation } from 'react-router-dom';
+import { Cat, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
@@ -16,43 +13,8 @@ const NAV_LINKS: { href: string; label: string }[] = [
 const navLinkBase =
   'text-sm font-medium text-muted-foreground transition-colors duration-200 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm';
 
-interface NavbarProps {
-  onCartClick: () => void;
-}
-
-interface ConfettiParticle {
-  id: number;
-  x: number;
-  y: number;
-  delay: number;
-}
-
-let particleCounter = 0;
-
-const Navbar = ({ onCartClick }: NavbarProps) => {
+const Navbar = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const totalItems = useCartStore((s) => s.totalItems());
-  const [shaking, setShaking] = useState(false);
-  const [confetti, setConfetti] = useState<ConfettiParticle[]>([]);
-  const cartBtnRef = useRef<HTMLButtonElement>(null);
-
-  const triggerAnimation = useCallback(() => {
-    setShaking(true);
-    setTimeout(() => setShaking(false), 500);
-    const particles: ConfettiParticle[] = Array.from({ length: 12 }, (_, i) => ({
-      id: ++particleCounter,
-      x: (Math.random() - 0.5) * 80,
-      y: -(Math.random() * 60 + 20),
-      delay: i * 0.05,
-    }));
-    setConfetti(particles);
-    setTimeout(() => setConfetti([]), 1400);
-  }, []);
-
-  useEffect(() => {
-    return onCartAdd(triggerAnimation);
-  }, [triggerAnimation]);
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/80 backdrop-blur-md">
@@ -77,7 +39,15 @@ const Navbar = ({ onCartClick }: NavbarProps) => {
             ))}
           </nav>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          <div className="hidden items-center gap-1 sm:flex">
+            <Button variant="ghost" size="sm" className="text-muted-foreground" asChild>
+              <Link to="/login">เข้าสู่ระบบ</Link>
+            </Button>
+            <Button size="sm" asChild>
+              <Link to="/register">สมัครสมาชิก</Link>
+            </Button>
+          </div>
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="sm:hidden" aria-label="เปิดเมนู">
@@ -97,36 +67,20 @@ const Navbar = ({ onCartClick }: NavbarProps) => {
                   </SheetClose>
                 ))}
               </nav>
+              <div className="mt-8 flex flex-col gap-2 border-t pt-6">
+                <SheetClose asChild>
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link to="/login">เข้าสู่ระบบ</Link>
+                  </Button>
+                </SheetClose>
+                <SheetClose asChild>
+                  <Button className="w-full" asChild>
+                    <Link to="/register">สมัครสมาชิก</Link>
+                  </Button>
+                </SheetClose>
+              </div>
             </SheetContent>
           </Sheet>
-          <Button
-            ref={cartBtnRef}
-            variant="ghost"
-            size="icon"
-            className={`relative ${shaking ? 'animate-shake' : ''}`}
-            onClick={onCartClick}
-          >
-            <ShoppingCart className="h-5 w-5" />
-            {totalItems > 0 && (
-              <Badge className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary p-0 text-xs text-primary-foreground">
-                {totalItems}
-              </Badge>
-            )}
-            {confetti.map((p) => (
-              <span
-                key={p.id}
-                className="pointer-events-none absolute text-primary animate-confetti-fall"
-                style={{
-                  left: `calc(50% + ${p.x}px)`,
-                  top: `calc(50% + ${p.y}px)`,
-                  animationDelay: `${p.delay}s`,
-                  fontSize: `${10 + Math.random() * 8}px`,
-                }}
-              >
-                💚
-              </span>
-            ))}
-          </Button>
         </div>
       </div>
     </header>

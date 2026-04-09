@@ -2,7 +2,6 @@ import { useOutletContext } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { Cat, Github, MapPin, MessageCircle, Phone } from 'lucide-react';
 import Hero from '@/components/Hero';
-import ProductCard from '@/components/ProductCard';
 import OrderStatusTracker from '@/components/OrderStatusTracker';
 import { products } from '@/lib/products';
 import { useCartStore } from '@/lib/cart-store';
@@ -28,13 +27,25 @@ const Home = () => {
       )}
       <Hero />
 
-      {/* Best Sellers */}
+      {/* Best Sellers — รูปเมนูอย่างเดียว */}
       <section className="container py-16">
-        <h2 className="mb-2 text-center text-3xl font-bold">สินค้าขายดี</h2>
-        <p className="mb-8 text-center text-muted-foreground">เมนูที่ลูกค้าชื่นชอบมากที่สุด</p>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {bestSellers.map((p, i) => (
-            <ProductCard key={p.id} product={p} onClick={openProduct} index={i} />
+        <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">สินค้าขายดี</h2>
+        <div className="mx-auto grid max-w-4xl grid-cols-3 gap-2 sm:gap-4">
+          {bestSellers.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => openProduct(p)}
+              className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-muted shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              aria-label={`เปิดเมนู ${p.name}`}
+            >
+              <img
+                src={p.image}
+                alt=""
+                loading="lazy"
+                className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+              />
+            </button>
           ))}
         </div>
         <div className="mt-8 text-center">

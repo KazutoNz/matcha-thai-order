@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
 import CartFAB from '@/components/CartFAB';
+import ScrollToTop from '@/components/ScrollToTop';
 import ProductModal from '@/components/ProductModal';
 import { type Product } from '@/lib/products';
 
@@ -23,7 +24,7 @@ const PublicLayout = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar onCartClick={() => setCartOpen(true)} />
+      <Navbar />
       <main className="flex-1">
         <Outlet context={ctx} />
       </main>
@@ -35,6 +36,7 @@ const PublicLayout = () => {
       />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
       <CartFAB onClick={() => setCartOpen(true)} />
+      <ScrollToTop />
     </div>
   );
 };
