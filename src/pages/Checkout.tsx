@@ -1,15 +1,17 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useCartStore, type Order } from '@/lib/cart-store';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { useCartStore } from '@/lib/cart-store';
 import { toppings } from '@/lib/products';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { CreditCard, Banknote, QrCode, Trash2 } from 'lucide-react';
+import { CreditCard, Banknote, QrCode, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 const toppingNameMap: Record<string, string> = {};
 toppings.forEach((t) => (toppingNameMap[t.id] = t.name));
@@ -20,18 +22,26 @@ const paymentMethods = [
   { value: 'promptpay', label: 'พร้อมเพย์', icon: QrCode },
 ];
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 const Checkout = () => {
   const items = useCartStore((s) => s.items);
   const removeItem = useCartStore((s) => s.removeItem);
   const clearCart = useCartStore((s) => s.clearCart);
   const totalPrice = useCartStore((s) => s.totalPrice());
-  const addOrder = useCartStore((s) => s.addOrder);
   const navigate = useNavigate();
+  const { user, loading: authLoading, refreshProfile } = useAuth();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [payment, setPayment] = useState('cash');
+  const [busy, setBusy] = useState(false);
+
+  if (!authLoading && !user) {
+    toast.info('กรุณาเข้าสู่ระบบก่อนสั่งซื้อ');
+    return <Navigate to="/login" replace />;
+  }
 
   if (items.length === 0) {
     return (
@@ -42,32 +52,50 @@ const Checkout = () => {
     );
   }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!name.trim() || !phone.trim() || !address.trim()) {
       toast.error('กรุณากรอกข้อมูลให้ครบถ้วน');
       return;
     }
-    const order: Order = {
-      id: `ORD-${Date.now().toString(36).toUpperCase()}`,
-      customerName: name.trim(),
-      phone: phone.trim(),
-      address: address.trim(),
-      items: [...items],
-      total: totalPrice,
-      status: 'pending',
-      createdAt: new Date(),
-    };
-    addOrder(order);
-    clearCart();
-    toast.success('สั่งซื้อเรียบร้อยแล้ว!');
-    navigate('/tracking');
+    if (!user) return;
+
+    setBusy(true);
+    try {
+      const { data: order, error } = await supabase
+        .from('orders')
+        .insert({ user_id: user.id, total: totalPrice, status: 'pending' })
+        .select()
+        .single();
+      if (error || !order) throw error || new Error('ไม่สามารถสร้างออเดอร์ได้');
+
+      const validItems = items.filter((i) => UUID_RE.test(String(i.productId)));
+      if (validItems.length > 0) {
+        const rows = validItems.map((i) => ({
+          order_id: order.id,
+          product_id: String(i.productId),
+          qty: i.quantity,
+          price: i.totalPrice,
+        }));
+        const { error: e2 } = await supabase.from('order_items').insert(rows);
+        if (e2) console.error('order_items insert', e2);
+      }
+
+      clearCart();
+      await refreshProfile();
+      toast.success('สั่งซื้อสำเร็จ! ได้รับ 10 แต้มสะสม 🎉');
+      navigate('/tracking');
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || 'เกิดข้อผิดพลาดในการสั่งซื้อ');
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
     <div className="container py-8">
       <h1 className="mb-8 text-center text-3xl font-bold">ชำระเงิน</h1>
       <div className="grid gap-8 lg:grid-cols-5">
-        {/* Left: Form */}
         <div className="space-y-6 lg:col-span-3">
           <div className="rounded-lg border bg-card p-6 space-y-4">
             <h2 className="text-lg font-semibold">ข้อมูลการจัดส่ง</h2>
@@ -108,7 +136,6 @@ const Checkout = () => {
           </div>
         </div>
 
-        {/* Right: Order Summary */}
         <div className="lg:col-span-2">
           <div className="rounded-lg border bg-card p-6 lg:sticky lg:top-20 space-y-4">
             <h2 className="text-lg font-semibold">สรุปคำสั่งซื้อ</h2>
@@ -135,7 +162,8 @@ const Checkout = () => {
               <span>ยอดรวม</span>
               <span className="text-primary">฿{totalPrice}</span>
             </div>
-            <Button size="lg" className="w-full" onClick={handleConfirm}>
+            <Button size="lg" className="w-full" onClick={handleConfirm} disabled={busy}>
+              {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               ยืนยันคำสั่งซื้อ
             </Button>
           </div>
