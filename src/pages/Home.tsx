@@ -115,9 +115,26 @@ const Home = () => {
             <div className="space-y-2">
               <p className="font-medium leading-relaxed">123 ถนนตัวอย่าง แขวงตัวอย่าง เขตตัวอย่าง<br />กรุงเทพมหานคร 10110</p>
               <p className="text-sm text-muted-foreground">เปิดทุกวัน 10:00–20:00 น.</p>
-              <a href="https://maps.google.com/?q=13.7563,100.5018" target="_blank" rel="noopener noreferrer" className="inline-flex text-sm font-medium text-primary underline-offset-4 hover:underline">เปิดใน Google Maps</a>
+              <a href="https://www.google.com/maps/search/?api=1&query=13.7563,100.5018" target="_blank" rel="noopener noreferrer" className="inline-flex text-sm font-medium text-primary underline-offset-4 hover:underline">เปิดใน Google Maps</a>
             </div>
           </div>
+          <a
+            href="https://www.google.com/maps/search/?api=1&query=13.7563,100.5018"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 block overflow-hidden rounded-lg border shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="เปิดแผนที่ใน Google Maps"
+          >
+            <iframe
+              title="แผนที่ร้าน MatchaMew"
+              src="https://www.google.com/maps?q=13.7563,100.5018&hl=th&z=16&output=embed"
+              width="100%"
+              height="320"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="pointer-events-none block w-full border-0"
+            />
+          </a>
         </div>
       </section>
     </>
