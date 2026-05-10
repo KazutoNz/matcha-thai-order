@@ -6,11 +6,12 @@ import productMochi from '@/assets/product-mochi.jpg';
 import productSmoothie from '@/assets/product-smoothie.jpg';
 
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   price: number;
   image: string;
   category: 'drink' | 'dessert';
+  order_count?: number;
 }
 
 export const products: Product[] = [
