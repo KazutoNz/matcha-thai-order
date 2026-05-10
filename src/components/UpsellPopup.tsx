@@ -33,7 +33,7 @@ const UpsellPopup = ({ cartOpen }: UpsellPopupProps) => {
 
   const handleAddGoldenBoba = () => {
     addItem({
-      productId: 999,
+      productId: 'upsell-golden-boba',
       name: '🌟 Golden Boba พิเศษ',
       image: items[0]?.image || '',
       basePrice: 35,
