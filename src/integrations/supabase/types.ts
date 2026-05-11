@@ -109,22 +109,34 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
+          birthday: string | null
           created_at: string
           customer_code: string
+          default_address: string | null
+          default_phone: string | null
           full_name: string | null
           id: string
           reward_points: number
         }
         Insert: {
+          avatar_url?: string | null
+          birthday?: string | null
           created_at?: string
           customer_code: string
+          default_address?: string | null
+          default_phone?: string | null
           full_name?: string | null
           id: string
           reward_points?: number
         }
         Update: {
+          avatar_url?: string | null
+          birthday?: string | null
           created_at?: string
           customer_code?: string
+          default_address?: string | null
+          default_phone?: string | null
           full_name?: string | null
           id?: string
           reward_points?: number
