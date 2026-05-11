@@ -8,6 +8,10 @@ export interface Profile {
   customer_code: string;
   reward_points: number;
   created_at: string;
+  avatar_url: string | null;
+  birthday: string | null;
+  default_address: string | null;
+  default_phone: string | null;
 }
 
 interface AuthCtx {

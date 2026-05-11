@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useCartStore } from '@/lib/cart-store';
 import { toppings } from '@/lib/products';
@@ -30,13 +30,22 @@ const Checkout = () => {
   const clearCart = useCartStore((s) => s.clearCart);
   const totalPrice = useCartStore((s) => s.totalPrice());
   const navigate = useNavigate();
-  const { user, loading: authLoading, refreshProfile } = useAuth();
+  const { user, profile, loading: authLoading, refreshProfile } = useAuth();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [payment, setPayment] = useState('cash');
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (profile) {
+      if (!name && profile.full_name) setName(profile.full_name);
+      if (!phone && profile.default_phone) setPhone(profile.default_phone);
+      if (!address && profile.default_address) setAddress(profile.default_address);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile]);
 
   if (!authLoading && !user) {
     toast.info('กรุณาเข้าสู่ระบบก่อนสั่งซื้อ');
