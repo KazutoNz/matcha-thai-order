@@ -1,21 +1,62 @@
+import { useEffect, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import { Cat, Github, MapPin, MessageCircle, Phone } from 'lucide-react';
+import { Github, MapPin, MessageCircle, Phone } from 'lucide-react';
 import Hero from '@/components/Hero';
 import OrderStatusTracker from '@/components/OrderStatusTracker';
-import { products } from '@/lib/products';
-import { useCartStore } from '@/lib/cart-store';
+import { type Product } from '@/lib/products';
+import { supabase } from '@/integrations/supabase/client';
+import { useOrders } from '@/hooks/useOrders';
+import { Skeleton } from '@/components/ui/skeleton';
+import productLatte from '@/assets/product-latte.jpg';
+import productFrappe from '@/assets/product-frappe.jpg';
+import productCheesecake from '@/assets/product-cheesecake.jpg';
+import productSoftserve from '@/assets/product-softserve.jpg';
+import productMochi from '@/assets/product-mochi.jpg';
+import productSmoothie from '@/assets/product-smoothie.jpg';
 import type { PublicOutletContext } from '@/layouts/PublicLayout';
 
-const bestSellers = products.slice(0, 3);
+const FALLBACKS = [productLatte, productFrappe, productCheesecake, productSoftserve, productMochi, productSmoothie];
+const fallbackImage = (name: string) => {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return FALLBACKS[h % FALLBACKS.length];
+};
 
 const Home = () => {
   const { openProduct } = useOutletContext<PublicOutletContext>();
-  const orders = useCartStore((s) => s.orders);
-  const latestOrder = orders.length > 0 ? orders[orders.length - 1] : null;
+  const { orders } = useOrders();
+  const [bestSellers, setBestSellers] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('id, name, price, image_url, category, order_count')
+        .order('order_count', { ascending: false })
+        .limit(3);
+      if (cancelled) return;
+      if (error) console.error(error);
+      const mapped: Product[] = (data ?? []).map((p) => ({
+        id: p.id,
+        name: p.name,
+        price: Number(p.price),
+        image: p.image_url || fallbackImage(p.name),
+        category: p.category as 'drink' | 'dessert',
+        order_count: p.order_count,
+      }));
+      setBestSellers(mapped);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const latestOrder = orders[0];
   const statusToStep = (status: string | undefined) => {
     if (status === 'preparing') return 1;
+    if (status === 'ready') return 2;
     if (status === 'completed') return 3;
     return 0;
   };
@@ -27,26 +68,29 @@ const Home = () => {
       )}
       <Hero />
 
-      {/* Best Sellers — รูปเมนูอย่างเดียว */}
       <section className="container py-16">
         <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">สินค้าขายดี</h2>
         <div className="mx-auto grid max-w-4xl grid-cols-3 gap-2 sm:gap-4">
-          {bestSellers.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => openProduct(p)}
-              className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-muted shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              aria-label={`เปิดเมนู ${p.name}`}
-            >
-              <img
-                src={p.image}
-                alt=""
-                loading="lazy"
-                className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-              />
-            </button>
-          ))}
+          {loading
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="aspect-square w-full rounded-xl" />
+              ))
+            : bestSellers.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => openProduct(p)}
+                  className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-muted shadow-sm transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  aria-label={`เปิดเมนู ${p.name}`}
+                >
+                  <img
+                    src={p.image}
+                    alt=""
+                    loading="lazy"
+                    className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                  />
+                </button>
+              ))}
         </div>
         <div className="mt-8 text-center">
           <Link
@@ -58,7 +102,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* About */}
       <section id="about" className="scroll-mt-20 border-t bg-muted/30 py-16">
         <div className="container max-w-3xl">
           <h2 className="mb-4 text-center text-3xl font-bold">เกี่ยวกับเรา</h2>
@@ -69,7 +112,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Contact */}
       <section id="contact" className="scroll-mt-20 py-16">
         <div className="container max-w-6xl">
           <h2 className="mb-8 text-center text-3xl font-bold">ติดต่อ / ช่องทาง</h2>
@@ -106,7 +148,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Location */}
       <section id="location" className="scroll-mt-20 border-t bg-muted/30 py-16">
         <div className="container max-w-3xl">
           <h2 className="mb-6 text-center text-3xl font-bold">สถานที่ตั้ง</h2>
