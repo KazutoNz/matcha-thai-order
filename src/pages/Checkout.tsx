@@ -84,6 +84,8 @@ const Checkout = () => {
           product_id: String(i.productId),
           qty: i.quantity,
           price: i.totalPrice,
+          sweetness: i.sweetness,
+          toppings: i.toppings,
         }));
         const { error: e2 } = await supabase.from('order_items').insert(rows);
         if (e2) console.error('order_items insert', e2);
