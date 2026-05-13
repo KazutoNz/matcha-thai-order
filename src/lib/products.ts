@@ -1,10 +1,3 @@
-import productLatte from '@/assets/product-latte.jpg';
-import productFrappe from '@/assets/product-frappe.jpg';
-import productCheesecake from '@/assets/product-cheesecake.jpg';
-import productSoftserve from '@/assets/product-softserve.jpg';
-import productMochi from '@/assets/product-mochi.jpg';
-import productSmoothie from '@/assets/product-smoothie.jpg';
-
 export interface Product {
   id: string;
   name: string;
@@ -13,33 +6,6 @@ export interface Product {
   category: 'drink' | 'dessert';
   order_count?: number;
 }
-
-export const products: Product[] = [
-  { id: 'mock-1', name: 'มัทฉะ ลาเต้', price: 75, image: productLatte, category: 'drink' },
-  { id: 'mock-2', name: 'มัทฉะ แฟรปเป้', price: 85, image: productFrappe, category: 'drink' },
-  { id: 'mock-3', name: 'มัทฉะ ชีสเค้ก', price: 120, image: productCheesecake, category: 'dessert' },
-  { id: 'mock-4', name: 'มัทฉะ ซอฟท์เสิร์ฟ', price: 65, image: productSoftserve, category: 'dessert' },
-  { id: 'mock-5', name: 'มัทฉะ โมจิ', price: 90, image: productMochi, category: 'dessert' },
-  { id: 'mock-6', name: 'มัทฉะ สมูทตี้โบว์ล', price: 95, image: productSmoothie, category: 'drink' },
-  { id: 'mock-7', name: 'มัทฉะ อเมริกาโน่', price: 70, image: productLatte, category: 'drink' },
-  { id: 'mock-8', name: 'มัทฉะ คาปูชิโน่', price: 78, image: productLatte, category: 'drink' },
-  { id: 'mock-9', name: 'มัทฉะ นมสดร้อน', price: 72, image: productLatte, category: 'drink' },
-  { id: 'mock-10', name: 'มัทฉะ คุกกี้แฟรปเป้', price: 88, image: productFrappe, category: 'drink' },
-  { id: 'mock-11', name: 'มัทฉะ สตรอว์เบอร์รี', price: 92, image: productSmoothie, category: 'drink' },
-  { id: 'mock-12', name: 'มัทฉะ โยเกิร์ตปั่น', price: 89, image: productSmoothie, category: 'drink' },
-  { id: 'mock-13', name: 'มัทฉะ ชาไทยปั่น', price: 80, image: productFrappe, category: 'drink' },
-  { id: 'mock-14', name: 'มัทฉะ น้ำผึ้งมะนาว', price: 82, image: productSmoothie, category: 'drink' },
-  { id: 'mock-15', name: 'มัทฉะ พุดดิ้ง', price: 55, image: productSoftserve, category: 'dessert' },
-  { id: 'mock-16', name: 'มัทฉะ บราวนี่', price: 95, image: productCheesecake, category: 'dessert' },
-  { id: 'mock-17', name: 'มัทฉะ ทิรามิสุ', price: 115, image: productCheesecake, category: 'dessert' },
-  { id: 'mock-18', name: 'มัทฉะ ครัวซองต์', price: 68, image: productMochi, category: 'dessert' },
-  { id: 'mock-19', name: 'มัทฉะ วาฟเฟิล', price: 88, image: productSoftserve, category: 'dessert' },
-  { id: 'mock-20', name: 'มัทฉะ พานาคอตต้า', price: 105, image: productCheesecake, category: 'dessert' },
-  { id: 'mock-21', name: 'มัทฉะ ไอศกรีมโคน', price: 58, image: productSoftserve, category: 'dessert' },
-  { id: 'mock-22', name: 'มัทฉะ ชูครีม', price: 62, image: productSoftserve, category: 'dessert' },
-  { id: 'mock-23', name: 'มัทฉะ บิงซู', price: 135, image: productSmoothie, category: 'dessert' },
-  { id: 'mock-24', name: 'มัทฉะ โรลเค้ก', price: 98, image: productCheesecake, category: 'dessert' },
-];
 
 export const TOPPING_PRICE = 15;
 export const toppings = [

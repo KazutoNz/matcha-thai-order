@@ -21,6 +21,8 @@ export type Database = {
           price: number
           product_id: string
           qty: number
+          sweetness: string | null
+          toppings: string[]
         }
         Insert: {
           id?: string
@@ -28,6 +30,8 @@ export type Database = {
           price: number
           product_id: string
           qty?: number
+          sweetness?: string | null
+          toppings?: string[]
         }
         Update: {
           id?: string
@@ -35,6 +39,8 @@ export type Database = {
           price?: number
           product_id?: string
           qty?: number
+          sweetness?: string | null
+          toppings?: string[]
         }
         Relationships: [
           {
