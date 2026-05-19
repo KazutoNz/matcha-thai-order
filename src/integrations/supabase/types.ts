@@ -63,6 +63,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          rider_id: string | null
           status: Database["public"]["Enums"]["order_status"]
           total: number
           user_id: string
@@ -70,6 +71,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          rider_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           total: number
           user_id: string
@@ -77,6 +79,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          rider_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           total?: number
           user_id?: string
