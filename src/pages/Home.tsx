@@ -54,12 +54,6 @@ const Home = () => {
   }, []);
 
   const latestOrder = orders[0];
-  const statusToStep = (status: string | undefined) => {
-    if (status === 'preparing') return 1;
-    if (status === 'ready') return 2;
-    if (status === 'completed') return 3;
-    return 0;
-  };
 
   return (
     <>
