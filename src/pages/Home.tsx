@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Github, MapPin, MessageCircle, Phone } from 'lucide-react';
 import Hero from '@/components/Hero';
 import OrderStatusTracker from '@/components/OrderStatusTracker';
+import { STATUS_TO_STEP } from '@/lib/order-status';
 import { type Product } from '@/lib/products';
 import { supabase } from '@/integrations/supabase/client';
 import { useOrders } from '@/hooks/useOrders';
@@ -58,7 +59,7 @@ const Home = () => {
   return (
     <>
       {latestOrder && (
-        <OrderStatusTracker currentStep={statusToStep(latestOrder.status)} />
+        <OrderStatusTracker currentStep={STATUS_TO_STEP[latestOrder.status]} />
       )}
       <Hero />
 
