@@ -1,22 +1,20 @@
+import { useSearchParams, Link } from 'react-router-dom';
 import { useOrders } from '@/hooks/useOrders';
 import { toppings } from '@/lib/products';
 import OrderStatusTracker from '@/components/OrderStatusTracker';
-import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { STATUS_LABEL, STATUS_BADGE, STATUS_TO_STEP } from '@/lib/order-status';
+import { Phone } from 'lucide-react';
 
 const toppingNameMap: Record<string, string> = {};
 toppings.forEach((t) => (toppingNameMap[t.id] = t.name));
 
-const statusToStep = (status: string) => {
-  if (status === 'preparing') return 1;
-  if (status === 'ready') return 2;
-  if (status === 'completed') return 3;
-  return 0;
-};
-
 const Tracking = () => {
   const { orders, loading } = useOrders();
+  const [params] = useSearchParams();
+  const id = params.get('id');
 
   if (loading) {
     return (
@@ -36,19 +34,24 @@ const Tracking = () => {
     );
   }
 
-  const latestOrder = orders[0];
+  const order = (id && orders.find((o) => o.id === id)) || orders[0];
 
   return (
     <div className="container max-w-2xl py-8">
-      <h1 className="mb-8 text-center text-3xl font-bold">ติดตามคำสั่งซื้อ</h1>
-      <OrderStatusTracker currentStep={statusToStep(latestOrder.status)} />
-      <div className="mt-8 rounded-lg border bg-card p-6 space-y-4">
+      <h1 className="mb-6 text-center text-3xl font-bold">ติดตามคำสั่งซื้อ</h1>
+      <OrderStatusTracker currentStep={STATUS_TO_STEP[order.status]} />
+
+      <div className="mt-6 rounded-lg border bg-card p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">รหัสออเดอร์</span>
-          <span className="font-mono font-semibold text-xs">{latestOrder.id.slice(0, 8)}</span>
+          <div>
+            <p className="text-xs text-muted-foreground">รหัสออเดอร์</p>
+            <p className="font-mono font-semibold text-sm">{order.id.slice(0, 8)}</p>
+          </div>
+          <Badge className={STATUS_BADGE[order.status]}>{STATUS_LABEL[order.status]}</Badge>
         </div>
+
         <div className="space-y-2">
-          {latestOrder.order_items.map((item) => (
+          {order.order_items.map((item) => (
             <div key={item.id} className="flex items-center justify-between text-sm">
               <span>
                 {item.product?.name ?? 'สินค้า'} x{item.qty}
@@ -61,9 +64,21 @@ const Tracking = () => {
             </div>
           ))}
         </div>
+
         <div className="flex items-center justify-between border-t pt-3 text-lg font-bold">
           <span>ยอดรวม</span>
-          <span className="text-primary">฿{Number(latestOrder.total)}</span>
+          <span className="text-primary">฿{Number(order.total)}</span>
+        </div>
+
+        <div className="flex flex-wrap gap-2 pt-1">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/orders">ประวัติทั้งหมด</Link>
+          </Button>
+          <Button asChild size="sm">
+            <a href="tel:020000000">
+              <Phone className="mr-1 h-4 w-4" /> ติดต่อร้าน
+            </a>
+          </Button>
         </div>
       </div>
     </div>
