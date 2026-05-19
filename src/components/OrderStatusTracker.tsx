@@ -1,20 +1,22 @@
-import { Clock, ChefHat, Bike, CheckCircle2 } from 'lucide-react';
+import { Clock, CheckCheck, ChefHat, PackageCheck, Bike, Home } from 'lucide-react';
 
 const steps = [
   { label: 'รอดำเนินการ', icon: Clock },
+  { label: 'ยืนยันแล้ว', icon: CheckCheck },
   { label: 'กำลังเตรียม', icon: ChefHat },
+  { label: 'พร้อมจัดส่ง', icon: PackageCheck },
   { label: 'กำลังจัดส่ง', icon: Bike },
-  { label: 'สำเร็จ', icon: CheckCircle2 },
+  { label: 'ส่งถึงแล้ว', icon: Home },
 ];
 
 interface OrderStatusTrackerProps {
-  currentStep?: number; // 0-3
+  currentStep?: number; // 0-5
 }
 
 const OrderStatusTracker = ({ currentStep = 0 }: OrderStatusTrackerProps) => {
   return (
-    <div className="w-full bg-secondary/60 backdrop-blur-sm border-b">
-      <div className="container flex items-center justify-between py-2 px-4">
+    <div className="w-full rounded-lg bg-secondary/60 backdrop-blur-sm border">
+      <div className="flex items-start justify-between gap-1 py-3 px-2 sm:px-4">
         {steps.map((step, i) => {
           const Icon = step.icon;
           const isActive = i === currentStep;
@@ -22,18 +24,16 @@ const OrderStatusTracker = ({ currentStep = 0 }: OrderStatusTrackerProps) => {
           const isBike = step.icon === Bike && isActive;
 
           return (
-            <div key={step.label} className="flex flex-col items-center gap-0.5 relative">
-              {/* connector line */}
+            <div key={step.label} className="flex flex-1 flex-col items-center gap-1 relative">
               {i > 0 && (
                 <div
-                  className={`absolute top-3 -left-[calc(50%+8px)] w-[calc(100%-16px)] h-0.5 ${
-                    isDone ? 'bg-primary' : 'bg-border'
+                  className={`absolute top-3 right-1/2 h-0.5 w-full ${
+                    isDone || isActive ? 'bg-primary' : 'bg-border'
                   }`}
-                  style={{ width: '40px', left: '-28px' }}
                 />
               )}
               <div
-                className={`relative flex h-7 w-7 items-center justify-center rounded-full transition-colors ${
+                className={`relative z-10 flex h-7 w-7 items-center justify-center rounded-full transition-colors ${
                   isActive
                     ? 'bg-primary text-primary-foreground'
                     : isDone
@@ -43,7 +43,7 @@ const OrderStatusTracker = ({ currentStep = 0 }: OrderStatusTrackerProps) => {
               >
                 <Icon className={`h-3.5 w-3.5 ${isBike ? 'animate-motorcycle-move' : ''}`} />
               </div>
-              <span className={`text-[10px] leading-tight ${isActive ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
+              <span className={`text-[10px] text-center leading-tight ${isActive ? 'font-bold text-primary' : 'text-muted-foreground'}`}>
                 {step.label}
               </span>
             </div>

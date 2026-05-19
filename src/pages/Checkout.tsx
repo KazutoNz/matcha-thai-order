@@ -94,7 +94,7 @@ const Checkout = () => {
       clearCart();
       await refreshProfile();
       toast.success('สั่งซื้อสำเร็จ! ได้รับ 10 แต้มสะสม 🎉');
-      navigate('/tracking');
+      navigate(`/orders`);
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message || 'เกิดข้อผิดพลาดในการสั่งซื้อ');
