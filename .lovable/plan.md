@@ -1,44 +1,42 @@
-# Plan: Migrate All Data to Database API
+## ภาพรวม
+ขยายระบบจัดการออเดอร์และเพิ่ม role ใหม่ (Rider, Manager) พร้อม Dashboard และรายงานที่ละเอียดขึ้น
 
-## Goal
-Replace every remaining mock-data / localStorage reference with real Supabase database queries. No page should read from `useCartStore.orders` or the static `products` array anymore.
+## 1. หน้าประวัติการสั่งซื้อ (User)
+- สร้างหน้าใหม่ `/orders` แสดงประวัติทั้งหมดของผู้ใช้ พร้อมสถานะ
+- เพิ่มปุ่ม "ติดตามออเดอร์" ในแต่ละรายการ → ลิงก์ไป `/tracking/:id`
+- หลังกดสั่งซื้อใน Checkout redirect ไปหน้านี้แทน
+- เพิ่มลิงก์ "ประวัติออเดอร์" ใน Navbar / Profile
 
-## Phase 1: Database Migration
-- Add `sweetness text` and `toppings text[]` columns to `order_items` so customisations are persisted.
+## 2. ระบบ Role (User / Rider / Manager / Admin)
+- เพิ่ม enum role: `rider`, `manager` (ปัจจุบันมี `user`, `admin`)
+- อัปเดต RLS policies ให้ Manager/Admin จัดการได้, Rider เห็นเฉพาะออเดอร์ที่ต้องส่ง
+- เพิ่ม column `rider_id` และ `delivery_status` (`confirmed`, `out_for_delivery`, `delivered`) ใน orders หรือใช้ status เดิมที่ขยาย enum
 
-## Phase 2: New / Updated Hooks
-- `src/hooks/useOrders.ts` – Fetch current-user orders (for Home banner & Tracking) with auto-refresh.
-- `src/hooks/useAdminOrders.ts` – Fetch **all** orders (admin only) with status counts for the dashboard.
+### ขยาย order_status enum
+เพิ่ม: `confirmed`, `out_for_delivery`, `delivered`
 
-## Phase 3: Page Refactors
+## 3. Dashboard (Admin/Manager)
+- การ์ดสถานะแบบ realtime: ยืนยันรับแล้ว / กำลังจัดส่ง / ส่งถึงที่แล้ว / เสร็จสิ้น
+- กราฟยอดขายรายวัน (Recharts LineChart 7 วันล่าสุด)
+- กราฟเมนูยอดนิยม (BarChart top 5 สินค้า)
+- ตารางสรุปยอดขายต่อวัน
 
-### Home.tsx
-- Replace `products.slice(0, 3)` with a live query `SELECT * FROM products ORDER BY order_count DESC LIMIT 3`.
-- Replace `useCartStore.orders` with `useOrders()` to show the latest real order status banner.
+## 4. หน้า Rider
+- เส้นทาง `/rider` แสดงออเดอร์ที่ admin/manager กดส่งให้แล้ว
+- ปุ่ม "รับงาน" → status = `out_for_delivery`
+- ปุ่ม "ส่งสำเร็จ" → status = `delivered`
 
-### Tracking.tsx
-- Replace `useCartStore.orders` with `useOrders()`.
-- Display the most recent DB order with its items (joined query).
+## 5. รายละเอียดเชิงเทคนิค
+- Migration: ขยาย `app_role` enum + `order_status` enum, เพิ่ม `rider_id uuid` ใน orders, ปรับ RLS
+- Hook `useOrders` รับ filter เพิ่มเติม (by rider, by status)
+- เพิ่ม route guards ตาม role ใน App.tsx
+- ใช้ Recharts (ติดตั้งอยู่แล้วใน shadcn chart)
+- คงธีม matcha minimalist เดิม
 
-### Checkout.tsx
-- When inserting `order_items`, also write `sweetness` and `toppings` into the new columns.
-- After success, invalidate the orders cache so Tracking & Home see the new order immediately.
-
-### Admin Dashboard
-- Replace `useCartStore` stats with aggregated DB query (`count(*)`, `sum(total)` grouped by status).
-
-### Admin Orders
-- Replace `useCartStore.orders` with `useAdminOrders()`.
-- Add a Supabase `update` call when admin changes order status.
-
-### Admin Products
-- Already uses DB; no changes needed.
-
-## Phase 4: Cleanup
-- Remove the static `products` array from `src/lib/products.ts` (keep types, toppings, sweetness constants).
-- Strip `orders`, `addOrder`, `updateOrderStatus` out of `useCartStore` (cart items stay in memory).
-
-## Technical Details
-- Use `supabase.from(...).select(...)` with `useEffect` + `useState` for now (project already does this in Menu.tsx).
-- RLS policies already allow authenticated users to read their own orders and admins to read all orders.
-- For admin pages we can query `orders` directly; the RLS admin policy handles authorization.
+## โครงสร้างไฟล์ใหม่
+- `src/pages/Orders.tsx` (ประวัติ user)
+- `src/pages/rider/Deliveries.tsx`
+- `src/layouts/RiderLayout.tsx`
+- `src/hooks/useRole.ts`
+- อัปเดต `src/pages/admin/Dashboard.tsx` ให้มีกราฟ
+- อัปเดต `Checkout.tsx`, `Navbar.tsx`, `App.tsx`, `useOrders.ts`
