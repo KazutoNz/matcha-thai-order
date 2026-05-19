@@ -47,7 +47,7 @@ export const useOrders = (opts?: Opts) => {
       .select('id, user_id, total, status, created_at, rider_id, order_items(id, product_id, qty, price, sweetness, toppings, product:products(name, image_url))')
       .order('created_at', { ascending: false });
     if (!opts?.all && !opts?.riderId && user) q = q.eq('user_id', user.id);
-    if (opts?.statuses && opts.statuses.length) q = q.in('status', opts.statuses);
+    if (opts?.statuses && opts.statuses.length) q = q.in('status', opts.statuses as any);
     const { data, error } = await q;
     if (error) console.error('useOrders', error);
     setOrders((data as any as DbOrder[]) ?? []);
