@@ -14,7 +14,7 @@ import ThemeSwitcher from '@/components/ThemeSwitcher';
 const NAV_LINKS: { href: string; label: string }[] = [
   { href: '/', label: 'หน้าแรก' },
   { href: '/menu', label: 'เมนู' },
-  { href: '/tracking', label: 'ติดตามออเดอร์' },
+  { href: '/orders', label: 'ประวัติออเดอร์' },
 ];
 
 const navLinkBase =
@@ -76,7 +76,7 @@ const Navbar = () => {
                 <DropdownMenuItem onClick={() => navigate('/profile')}>
                   <UserIcon className="mr-2 h-4 w-4" /> โปรไฟล์
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/tracking')}>
+                <DropdownMenuItem onClick={() => navigate('/orders')}>
                   ประวัติออเดอร์
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
