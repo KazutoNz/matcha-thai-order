@@ -30,7 +30,7 @@ const OrderStatusFab = () => {
 
   return (
     <Link
-      to={`/tracking/${active.id}`}
+      to={`/tracking?id=${active.id}`}
       aria-label={`สถานะออเดอร์: ${label}`}
       className="fixed bottom-24 right-4 z-40 flex items-center gap-2 sm:bottom-6 sm:right-6"
     >

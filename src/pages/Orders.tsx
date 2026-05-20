@@ -1,21 +1,39 @@
+import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { useOrders } from '@/hooks/useOrders';
+import { useOrders, type DbOrder } from '@/hooks/useOrders';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { STATUS_LABEL, STATUS_BADGE } from '@/lib/order-status';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { STATUS_LABEL, STATUS_BADGE, STATUS_TO_STEP } from '@/lib/order-status';
+import OrderStatusTracker from '@/components/OrderStatusTracker';
 import { toppings } from '@/lib/products';
-import { MapPin, Phone } from 'lucide-react';
+import { MapPin, Phone, Clock, CheckCheck, ChefHat, PackageCheck, Bike, Home as HomeIcon } from 'lucide-react';
+import type { OrderStatus } from '@/hooks/useOrders';
 
 const toppingNameMap: Record<string, string> = {};
 toppings.forEach((t) => (toppingNameMap[t.id] = t.name));
 
+const STATUS_ICON: Record<OrderStatus, typeof Clock> = {
+  pending: Clock,
+  confirmed: CheckCheck,
+  preparing: ChefHat,
+  ready: PackageCheck,
+  out_for_delivery: Bike,
+  delivered: HomeIcon,
+  completed: HomeIcon,
+  cancelled: Clock,
+};
+
 const Orders = () => {
   const { user, loading: authLoading } = useAuth();
   const { orders, loading } = useOrders();
+  const [selected, setSelected] = useState<DbOrder | null>(null);
 
   if (!authLoading && !user) return <Navigate to="/login" replace />;
+
+  const StatusIcon = selected ? STATUS_ICON[selected.status] : Clock;
 
   return (
     <div className="container max-w-3xl py-8">
@@ -28,12 +46,12 @@ const Orders = () => {
       ) : orders.length === 0 ? (
         <div className="flex flex-col items-center gap-4 py-20 text-center">
           <p className="text-muted-foreground">ยังไม่มีคำสั่งซื้อ</p>
-          <Button asChild><Link to="/menu">เริ่มสั่งซื้อ</Link></Button>
+          <Button asChild className="rounded-full"><Link to="/menu">เริ่มสั่งซื้อ</Link></Button>
         </div>
       ) : (
         <div className="space-y-4">
           {orders.map((order) => (
-            <div key={order.id} className="rounded-lg border bg-card p-5 space-y-3">
+            <div key={order.id} className="rounded-2xl border bg-card p-5 space-y-3 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p className="text-xs text-muted-foreground">รหัสออเดอร์</p>
@@ -67,12 +85,10 @@ const Orders = () => {
               </div>
 
               <div className="flex flex-wrap gap-2 pt-1">
-                <Button asChild size="sm" variant="default">
-                  <Link to={`/tracking?id=${order.id}`}>
-                    <MapPin className="mr-1 h-4 w-4" /> ติดตามออเดอร์
-                  </Link>
+                <Button size="sm" className="rounded-full" onClick={() => setSelected(order)}>
+                  <MapPin className="mr-1 h-4 w-4" /> ติดตามสถานะ
                 </Button>
-                <Button asChild size="sm" variant="outline">
+                <Button asChild size="sm" variant="outline" className="rounded-full">
                   <a href="tel:020000000">
                     <Phone className="mr-1 h-4 w-4" /> ติดต่อร้าน
                   </a>
@@ -82,6 +98,42 @@ const Orders = () => {
           ))}
         </div>
       )}
+
+      <Dialog open={!!selected} onOpenChange={(v) => !v && setSelected(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>สถานะออเดอร์</DialogTitle>
+          </DialogHeader>
+          {selected && (
+            <div className="space-y-5">
+              <div className="flex flex-col items-center gap-3 py-2">
+                <div className="relative flex h-24 w-24 items-center justify-center">
+                  <span className="absolute inset-0 animate-ping rounded-full bg-primary/30" />
+                  <span className="absolute inset-0 animate-ping rounded-full bg-primary/20 [animation-delay:600ms]" />
+                  <span className="relative flex h-24 w-24 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg ring-4 ring-background">
+                    <StatusIcon className={`h-12 w-12 ${selected.status === 'out_for_delivery' ? 'animate-bounce' : ''}`} />
+                  </span>
+                </div>
+                <Badge className={STATUS_BADGE[selected.status] + ' text-base px-4 py-1 rounded-full'}>
+                  {STATUS_LABEL[selected.status]}
+                </Badge>
+                <p className="font-mono text-xs text-muted-foreground">#{selected.id.slice(0, 8)}</p>
+              </div>
+
+              <OrderStatusTracker currentStep={STATUS_TO_STEP[selected.status]} />
+
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Button asChild size="sm" className="flex-1 rounded-full">
+                  <Link to={`/tracking?id=${selected.id}`}>ดูหน้าติดตามแบบเต็ม</Link>
+                </Button>
+                <Button asChild size="sm" variant="outline" className="rounded-full">
+                  <a href="tel:020000000"><Phone className="mr-1 h-4 w-4" /> โทรร้าน</a>
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
