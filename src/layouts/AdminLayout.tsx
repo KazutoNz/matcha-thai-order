@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import {
   SidebarProvider,
   SidebarTrigger,
@@ -13,8 +13,8 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { NavLink } from '@/components/NavLink';
-import { useLocation } from 'react-router-dom';
-import { LayoutDashboard, ClipboardList, Package } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { LayoutDashboard, ClipboardList, Package, Home as HomeIcon } from 'lucide-react';
 
 const adminNav = [
   { title: 'แดชบอร์ด', url: '/admin', icon: LayoutDashboard },
@@ -67,6 +67,11 @@ const AdminLayout = () => {
           <header className="flex h-14 items-center gap-3 border-b px-4">
             <SidebarTrigger />
             <h1 className="text-lg font-bold">แดชบอร์ดผู้ดูแลระบบ</h1>
+            <div className="ml-auto">
+              <Button asChild variant="outline" size="sm" className="rounded-full">
+                <Link to="/"><HomeIcon className="mr-1 h-4 w-4" /> กลับหน้าหลัก</Link>
+              </Button>
+            </div>
           </header>
           <main className="flex-1 overflow-auto p-6">
             <Outlet />
