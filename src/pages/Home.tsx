@@ -3,11 +3,8 @@ import { useOutletContext } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { Github, MapPin, MessageCircle, Phone } from 'lucide-react';
 import Hero from '@/components/Hero';
-import OrderStatusTracker from '@/components/OrderStatusTracker';
-import { STATUS_TO_STEP } from '@/lib/order-status';
 import { type Product } from '@/lib/products';
 import { supabase } from '@/integrations/supabase/client';
-import { useOrders } from '@/hooks/useOrders';
 import { Skeleton } from '@/components/ui/skeleton';
 import productLatte from '@/assets/product-latte.jpg';
 import productFrappe from '@/assets/product-frappe.jpg';
@@ -26,7 +23,6 @@ const fallbackImage = (name: string) => {
 
 const Home = () => {
   const { openProduct } = useOutletContext<PublicOutletContext>();
-  const { orders } = useOrders();
   const [bestSellers, setBestSellers] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -54,13 +50,8 @@ const Home = () => {
     return () => { cancelled = true; };
   }, []);
 
-  const latestOrder = orders[0];
-
   return (
     <>
-      {latestOrder && (
-        <OrderStatusTracker currentStep={STATUS_TO_STEP[latestOrder.status]} />
-      )}
       <Hero />
 
       <section className="container py-16">
