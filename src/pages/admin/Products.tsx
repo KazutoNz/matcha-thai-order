@@ -107,7 +107,7 @@ const Products = () => {
       price: Number(edit.price),
       category: edit.category,
       image_url: edit.image_url || null,
-      variants: edit.variants.filter((v) => v.label.trim() || v.image_url.trim()),
+      variants: edit.variants.filter((v) => v.label.trim() || v.image_url.trim()) as any,
     };
     const { error } = edit.id
       ? await supabase.from('products').update(payload).eq('id', edit.id)
