@@ -6,6 +6,7 @@ import CartDrawer from '@/components/CartDrawer';
 import CartFAB from '@/components/CartFAB';
 import ScrollToTop from '@/components/ScrollToTop';
 import ProductModal from '@/components/ProductModal';
+import OrderStatusFab from '@/components/OrderStatusFab';
 import { type Product } from '@/lib/products';
 
 export interface PublicOutletContext {
@@ -36,6 +37,7 @@ const PublicLayout = () => {
       />
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
       <CartFAB onClick={() => setCartOpen(true)} />
+      <OrderStatusFab />
       <ScrollToTop />
     </div>
   );
