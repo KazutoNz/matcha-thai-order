@@ -95,6 +95,7 @@ export type Database = {
           name: string
           order_count: number
           price: number
+          variants: Json
         }
         Insert: {
           category?: Database["public"]["Enums"]["product_category"]
@@ -104,6 +105,7 @@ export type Database = {
           name: string
           order_count?: number
           price: number
+          variants?: Json
         }
         Update: {
           category?: Database["public"]["Enums"]["product_category"]
@@ -113,6 +115,7 @@ export type Database = {
           name?: string
           order_count?: number
           price?: number
+          variants?: Json
         }
         Relationships: []
       }
