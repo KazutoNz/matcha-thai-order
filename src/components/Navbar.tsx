@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Cat, LogOut, Menu, Sparkles, User as UserIcon } from 'lucide-react';
+import { Cat, LayoutDashboard, LogOut, Menu, Bike, Sparkles, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { useRole } from '@/hooks/useRole';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 
 const NAV_LINKS: { href: string; label: string }[] = [
@@ -24,6 +25,7 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, profile, signOut } = useAuth();
+  const { isStaff, isRider } = useRole();
 
   const initial = (profile?.full_name || user?.email || '?').charAt(0).toUpperCase();
 
@@ -79,6 +81,16 @@ const Navbar = () => {
                 <DropdownMenuItem onClick={() => navigate('/orders')}>
                   ประวัติออเดอร์
                 </DropdownMenuItem>
+                {isStaff && (
+                  <DropdownMenuItem onClick={() => navigate('/admin')}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" /> แดชบอร์ดผู้ดูแล
+                  </DropdownMenuItem>
+                )}
+                {isRider && (
+                  <DropdownMenuItem onClick={() => navigate('/rider')}>
+                    <Bike className="mr-2 h-4 w-4" /> งานจัดส่ง
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
                   <LogOut className="mr-2 h-4 w-4" /> ออกจากระบบ
