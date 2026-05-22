@@ -14,12 +14,13 @@ import {
 } from '@/components/ui/sidebar';
 import { NavLink } from '@/components/NavLink';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, ClipboardList, Package, Home as HomeIcon } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Package, Home as HomeIcon, Users as UsersIcon } from 'lucide-react';
 
 const adminNav = [
   { title: 'แดชบอร์ด', url: '/admin', icon: LayoutDashboard },
   { title: 'จัดการออเดอร์', url: '/admin/orders', icon: ClipboardList },
   { title: 'จัดการสินค้า', url: '/admin/products', icon: Package },
+  { title: 'จัดการผู้ใช้', url: '/admin/users', icon: UsersIcon },
 ];
 
 function AdminSidebar() {
