@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 interface Variant {
   label: string;
   image_url: string;
+  price_delta?: number;
 }
 
 interface DbProduct {
@@ -24,6 +25,7 @@ interface DbProduct {
   category: 'drink' | 'dessert';
   order_count: number;
   variants: Variant[];
+  images: string[];
 }
 
 type EditState = {
@@ -33,10 +35,11 @@ type EditState = {
   category: 'drink' | 'dessert';
   image_url: string;
   variants: Variant[];
+  images: string[];
 };
 
 const emptyEdit = (): EditState => ({
-  name: '', price: '', category: 'drink', image_url: '', variants: [],
+  name: '', price: '', category: 'drink', image_url: '', variants: [], images: [],
 });
 
 const Products = () => {
