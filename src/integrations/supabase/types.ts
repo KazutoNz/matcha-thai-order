@@ -92,6 +92,7 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          images: string[]
           name: string
           order_count: number
           price: number
@@ -102,6 +103,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          images?: string[]
           name: string
           order_count?: number
           price: number
@@ -112,6 +114,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          images?: string[]
           name?: string
           order_count?: number
           price?: number
