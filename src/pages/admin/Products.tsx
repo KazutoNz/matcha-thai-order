@@ -102,10 +102,15 @@ const Products = () => {
     }
   };
 
-  const addVariant = () => setEdit((s) => ({ ...s, variants: [...s.variants, { label: '', image_url: '' }] }));
+  const addVariant = () => setEdit((s) => ({ ...s, variants: [...s.variants, { label: '', image_url: '', price_delta: 0 }] }));
   const removeVariant = (i: number) => setEdit((s) => ({ ...s, variants: s.variants.filter((_, idx) => idx !== i) }));
   const updateVariant = (i: number, patch: Partial<Variant>) =>
     setEdit((s) => ({ ...s, variants: s.variants.map((v, idx) => idx === i ? { ...v, ...patch } : v) }));
+
+  const addImage = () => setEdit((s) => ({ ...s, images: [...s.images, ''] }));
+  const removeImage = (i: number) => setEdit((s) => ({ ...s, images: s.images.filter((_, idx) => idx !== i) }));
+  const updateImage = (i: number, val: string) =>
+    setEdit((s) => ({ ...s, images: s.images.map((v, idx) => idx === i ? val : v) }));
 
   const handleSave = async () => {
     if (!edit.name.trim() || !edit.price) { toast.error('กรุณากรอกข้อมูลให้ครบ'); return; }
@@ -115,7 +120,10 @@ const Products = () => {
       price: Number(edit.price),
       category: edit.category,
       image_url: edit.image_url || null,
-      variants: edit.variants.filter((v) => v.label.trim() || v.image_url.trim()) as any,
+      images: edit.images.map((u) => u.trim()).filter(Boolean),
+      variants: edit.variants
+        .filter((v) => v.label.trim() || v.image_url.trim())
+        .map((v) => ({ ...v, price_delta: Number(v.price_delta) || 0 })) as any,
     };
     const { error } = edit.id
       ? await supabase.from('products').update(payload).eq('id', edit.id)
