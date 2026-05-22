@@ -57,7 +57,11 @@ const Products = () => {
       .select('*')
       .order('created_at', { ascending: false });
     if (error) toast.error(error.message);
-    setItems(((data as any[]) ?? []).map((p) => ({ ...p, variants: Array.isArray(p.variants) ? p.variants : [] })));
+    setItems(((data as any[]) ?? []).map((p) => ({
+      ...p,
+      variants: Array.isArray(p.variants) ? p.variants : [],
+      images: Array.isArray(p.images) ? p.images : [],
+    })));
     setLoading(false);
   };
 
@@ -72,6 +76,7 @@ const Products = () => {
       category: p.category,
       image_url: p.image_url ?? '',
       variants: p.variants ?? [],
+      images: p.images ?? [],
     });
     setOpen(true);
   };
