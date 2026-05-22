@@ -21,6 +21,7 @@ import Profile from "@/pages/Profile";
 import Dashboard from "@/pages/admin/Dashboard";
 import AdminOrders from "@/pages/admin/Orders";
 import Products from "@/pages/admin/Products";
+import Users from "@/pages/admin/Users";
 import Deliveries from "@/pages/rider/Deliveries";
 import NotFound from "@/pages/NotFound";
 
@@ -59,6 +60,7 @@ const App = () => (
                   <Route index element={<Dashboard />} />
                   <Route path="orders" element={<AdminOrders />} />
                   <Route path="products" element={<Products />} />
+                  <Route path="users" element={<Users />} />
                 </Route>
               </Route>
               <Route path="/rider" element={<RiderLayout />}>

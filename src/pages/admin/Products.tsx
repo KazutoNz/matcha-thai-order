@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 interface Variant {
   label: string;
   image_url: string;
+  price_delta?: number;
 }
 
 interface DbProduct {
@@ -24,6 +25,7 @@ interface DbProduct {
   category: 'drink' | 'dessert';
   order_count: number;
   variants: Variant[];
+  images: string[];
 }
 
 type EditState = {
@@ -33,10 +35,11 @@ type EditState = {
   category: 'drink' | 'dessert';
   image_url: string;
   variants: Variant[];
+  images: string[];
 };
 
 const emptyEdit = (): EditState => ({
-  name: '', price: '', category: 'drink', image_url: '', variants: [],
+  name: '', price: '', category: 'drink', image_url: '', variants: [], images: [],
 });
 
 const Products = () => {
@@ -54,7 +57,11 @@ const Products = () => {
       .select('*')
       .order('created_at', { ascending: false });
     if (error) toast.error(error.message);
-    setItems(((data as any[]) ?? []).map((p) => ({ ...p, variants: Array.isArray(p.variants) ? p.variants : [] })));
+    setItems(((data as any[]) ?? []).map((p) => ({
+      ...p,
+      variants: Array.isArray(p.variants) ? p.variants : [],
+      images: Array.isArray(p.images) ? p.images : [],
+    })));
     setLoading(false);
   };
 
@@ -69,6 +76,7 @@ const Products = () => {
       category: p.category,
       image_url: p.image_url ?? '',
       variants: p.variants ?? [],
+      images: p.images ?? [],
     });
     setOpen(true);
   };
@@ -94,10 +102,15 @@ const Products = () => {
     }
   };
 
-  const addVariant = () => setEdit((s) => ({ ...s, variants: [...s.variants, { label: '', image_url: '' }] }));
+  const addVariant = () => setEdit((s) => ({ ...s, variants: [...s.variants, { label: '', image_url: '', price_delta: 0 }] }));
   const removeVariant = (i: number) => setEdit((s) => ({ ...s, variants: s.variants.filter((_, idx) => idx !== i) }));
   const updateVariant = (i: number, patch: Partial<Variant>) =>
     setEdit((s) => ({ ...s, variants: s.variants.map((v, idx) => idx === i ? { ...v, ...patch } : v) }));
+
+  const addImage = () => setEdit((s) => ({ ...s, images: [...s.images, ''] }));
+  const removeImage = (i: number) => setEdit((s) => ({ ...s, images: s.images.filter((_, idx) => idx !== i) }));
+  const updateImage = (i: number, val: string) =>
+    setEdit((s) => ({ ...s, images: s.images.map((v, idx) => idx === i ? val : v) }));
 
   const handleSave = async () => {
     if (!edit.name.trim() || !edit.price) { toast.error('กรุณากรอกข้อมูลให้ครบ'); return; }
@@ -107,7 +120,10 @@ const Products = () => {
       price: Number(edit.price),
       category: edit.category,
       image_url: edit.image_url || null,
-      variants: edit.variants.filter((v) => v.label.trim() || v.image_url.trim()) as any,
+      images: edit.images.map((u) => u.trim()).filter(Boolean),
+      variants: edit.variants
+        .filter((v) => v.label.trim() || v.image_url.trim())
+        .map((v) => ({ ...v, price_delta: Number(v.price_delta) || 0 })) as any,
     };
     const { error } = edit.id
       ? await supabase.from('products').update(payload).eq('id', edit.id)
@@ -232,11 +248,44 @@ const Products = () => {
             </div>
           </div>
 
+          {/* Gallery images */}
           <div className="space-y-3 rounded-lg border p-4">
             <div className="flex items-center justify-between">
               <div>
-                <Label className="text-base">รูปตัวเลือกเพิ่มเติม</Label>
-                <p className="text-xs text-muted-foreground">เช่น "แบบม้อล", "ปั่น", "ไซส์ใหญ่" — เพิ่มได้หลายรูป</p>
+                <Label className="text-base">รูปภาพแกลเลอรี</Label>
+                <p className="text-xs text-muted-foreground">เพิ่มรูปหลายๆมุมหรือสไตล์ของสินค้า</p>
+              </div>
+              <Button type="button" size="sm" variant="outline" onClick={addImage} className="rounded-full">
+                <Plus className="mr-1 h-3 w-3" /> เพิ่มรูป
+              </Button>
+            </div>
+            {edit.images.length === 0 ? (
+              <p className="py-3 text-center text-xs text-muted-foreground">ยังไม่มีรูปเพิ่มเติม</p>
+            ) : (
+              <div className="space-y-2">
+                {edit.images.map((url, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    {url ? (
+                      <img src={url} alt={`gallery-${i}`} className="h-12 w-12 shrink-0 rounded-md object-cover border" />
+                    ) : (
+                      <div className="h-12 w-12 shrink-0 rounded-md border bg-muted" />
+                    )}
+                    <Input value={url} onChange={(e) => updateImage(i, e.target.value)} placeholder="URL รูป" />
+                    <Button type="button" variant="ghost" size="icon" onClick={() => removeImage(i)}>
+                      <X className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Special variations */}
+          <div className="space-y-3 rounded-lg border p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-base">ตัวเลือกพิเศษ (Variations)</Label>
+                <p className="text-xs text-muted-foreground">เช่น "Mint Matcha", "ปั่น", "ไซส์ใหญ่" — ปรับราคาเพิ่ม/ลดได้</p>
               </div>
               <Button type="button" size="sm" variant="outline" onClick={addVariant} className="rounded-full">
                 <Plus className="mr-1 h-3 w-3" /> เพิ่มตัวเลือก
@@ -253,11 +302,15 @@ const Products = () => {
                     ) : (
                       <div className="h-16 w-16 rounded-md border bg-muted" />
                     )}
-                    <div className="flex-1 min-w-[10rem] space-y-1">
+                    <div className="flex-1 min-w-[8rem] space-y-1">
                       <Label className="text-xs">ชื่อแบบ</Label>
-                      <Input value={v.label} onChange={(e) => updateVariant(i, { label: e.target.value })} placeholder="เช่น แบบม้อล" />
+                      <Input value={v.label} onChange={(e) => updateVariant(i, { label: e.target.value })} placeholder="เช่น Mint Matcha" />
                     </div>
-                    <div className="flex-1 min-w-[12rem] space-y-1">
+                    <div className="w-24 space-y-1">
+                      <Label className="text-xs">ส่วนต่างราคา</Label>
+                      <Input type="number" value={v.price_delta ?? 0} onChange={(e) => updateVariant(i, { price_delta: Number(e.target.value) })} placeholder="0" />
+                    </div>
+                    <div className="flex-1 min-w-[10rem] space-y-1">
                       <Label className="text-xs">URL รูป</Label>
                       <Input value={v.image_url} onChange={(e) => updateVariant(i, { image_url: e.target.value })} placeholder="URL" />
                     </div>
@@ -272,6 +325,7 @@ const Products = () => {
               </div>
             )}
           </div>
+
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>ยกเลิก</Button>

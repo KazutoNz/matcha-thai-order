@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Product, sweetnessOptions, toppings, TOPPING_PRICE } from '@/lib/products';
+import { useEffect, useMemo, useState } from 'react';
+import { Product, sweetnessOptions, toppings, TOPPING_PRICE, DEFAULT_SWEETNESS, Variation } from '@/lib/products';
 import { useCartStore } from '@/lib/cart-store';
 import {
   Dialog,
@@ -11,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Check, Minus, Plus } from 'lucide-react';
+import { Check, Minus, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -22,16 +22,40 @@ interface ProductModalProps {
 }
 
 const ProductModal = ({ product, open, onClose }: ProductModalProps) => {
-  const [sweetness, setSweetness] = useState('100%');
+  const [sweetness, setSweetness] = useState(DEFAULT_SWEETNESS);
   const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
+  const [variationIdx, setVariationIdx] = useState<number>(-1); // -1 = standard
   const [quantity, setQuantity] = useState(1);
+  const [imageIdx, setImageIdx] = useState(0);
   const addItem = useCartStore((s) => s.addItem);
+
+  const gallery = useMemo(() => {
+    if (!product) return [] as string[];
+    const arr = [product.image, ...(product.images ?? [])].filter(Boolean);
+    return Array.from(new Set(arr));
+  }, [product]);
+
+  // Reset state every time modal opens or product changes
+  useEffect(() => {
+    if (open && product) {
+      setSweetness(DEFAULT_SWEETNESS);
+      setSelectedToppings([]);
+      setVariationIdx(-1);
+      setQuantity(1);
+      setImageIdx(0);
+    }
+  }, [open, product?.id]);
 
   if (!product) return null;
 
+  const variations: Variation[] = product.variations ?? [];
+  const chosenVariation = variationIdx >= 0 ? variations[variationIdx] : undefined;
   const toppingsCost = selectedToppings.length * TOPPING_PRICE;
-  const unitPrice = product.price + toppingsCost;
+  const variationDelta = chosenVariation?.price_delta ?? 0;
+  const unitPrice = product.price + variationDelta + toppingsCost;
   const totalPrice = unitPrice * quantity;
+
+  const displayImage = chosenVariation?.image_url || gallery[imageIdx] || product.image;
 
   const toggleTopping = (id: string) => {
     setSelectedToppings((prev) =>
@@ -42,18 +66,16 @@ const ProductModal = ({ product, open, onClose }: ProductModalProps) => {
   const handleAdd = () => {
     addItem({
       productId: product.id,
-      name: product.name,
-      image: product.image,
-      basePrice: product.price,
+      name: chosenVariation ? `${product.name} (${chosenVariation.label})` : product.name,
+      image: displayImage,
+      basePrice: product.price + variationDelta,
       sweetness,
       toppings: selectedToppings,
+      variation: chosenVariation?.label,
       quantity,
       totalPrice,
     });
     toast.success('เพิ่มลงตะกร้าแล้ว!');
-    setSweetness('100%');
-    setSelectedToppings([]);
-    setQuantity(1);
     onClose();
   };
 
@@ -62,6 +84,8 @@ const ProductModal = ({ product, open, onClose }: ProductModalProps) => {
     '[scrollbar-width:thin] [scrollbar-color:hsl(var(--primary)/0.35)_transparent] ' +
     '[&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent ' +
     '[&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-primary/30 hover:[&::-webkit-scrollbar-thumb]:bg-primary/45';
+
+  const showCarousel = gallery.length > 1 && !chosenVariation?.image_url;
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -80,21 +104,98 @@ const ProductModal = ({ product, open, onClose }: ProductModalProps) => {
         </div>
 
         <div className="relative shrink-0 border-b border-border/50 bg-muted/40 px-4 py-3">
-          <div className="mx-auto w-full max-w-[9rem] sm:max-w-[10.5rem]">
+          <div className="relative mx-auto w-full max-w-[9rem] sm:max-w-[10.5rem]">
             <img
-              src={product.image}
+              src={displayImage}
               alt={product.name}
               className="aspect-square w-full rounded-xl object-cover shadow-sm ring-1 ring-border/50 sm:rounded-2xl"
             />
+            {showCarousel && (
+              <>
+                <button
+                  type="button"
+                  aria-label="ก่อนหน้า"
+                  onClick={() => setImageIdx((i) => (i - 1 + gallery.length) % gallery.length)}
+                  className="absolute left-1 top-1/2 -translate-y-1/2 rounded-full bg-background/85 p-1 shadow ring-1 ring-border/60 hover:bg-background"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="ถัดไป"
+                  onClick={() => setImageIdx((i) => (i + 1) % gallery.length)}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-background/85 p-1 shadow ring-1 ring-border/60 hover:bg-background"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </>
+            )}
           </div>
+          {showCarousel && (
+            <div className="mt-2 flex justify-center gap-1.5">
+              {gallery.map((src, i) => (
+                <button
+                  key={src + i}
+                  type="button"
+                  onClick={() => setImageIdx(i)}
+                  aria-label={`รูปที่ ${i + 1}`}
+                  className={cn(
+                    'h-1.5 w-1.5 rounded-full transition-all',
+                    i === imageIdx ? 'w-4 bg-primary' : 'bg-muted-foreground/40',
+                  )}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="shrink-0 border-b border-border/40 bg-background px-5 py-3">
-          <p className="text-lg font-bold tabular-nums text-primary sm:text-xl">฿{product.price}</p>
+          <p className="text-lg font-bold tabular-nums text-primary sm:text-xl">฿{unitPrice}</p>
         </div>
 
         <div className={scrollAreaClass}>
           <div className="space-y-4">
+            {/* Special Variations */}
+            {variations.length > 0 && (
+              <div className="space-y-2.5 rounded-xl border border-border/60 bg-card/90 p-3 shadow-sm sm:space-y-3 sm:p-4">
+                <div>
+                  <Label className="text-sm font-semibold sm:text-base">ตัวเลือกพิเศษ</Label>
+                  <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
+                    เลือกแบบที่ต้องการ — บางแบบอาจมีค่าใช้จ่ายเพิ่ม
+                  </p>
+                </div>
+                <RadioGroup
+                  value={String(variationIdx)}
+                  onValueChange={(v) => setVariationIdx(parseInt(v, 10))}
+                  className="grid grid-cols-2 gap-2"
+                >
+                  {[{ label: 'มาตรฐาน', price_delta: 0 } as Variation, ...variations].map((v, i) => {
+                    const idx = i - 1; // -1 = standard
+                    const selected = variationIdx === idx;
+                    const delta = v.price_delta ?? 0;
+                    return (
+                      <Label
+                        key={`${v.label}-${i}`}
+                        className={cn(
+                          'relative flex cursor-pointer flex-col gap-1 rounded-lg border-2 p-2.5 transition-all',
+                          'hover:border-primary/35 hover:bg-muted/40',
+                          selected
+                            ? 'border-primary bg-primary/10 shadow-md ring-2 ring-primary/25'
+                            : 'border-border bg-card',
+                        )}
+                      >
+                        <RadioGroupItem value={String(idx)} className="sr-only" />
+                        <span className="text-xs font-semibold leading-tight sm:text-sm">{v.label}</span>
+                        <span className="text-[10px] tabular-nums text-muted-foreground sm:text-[11px]">
+                          {delta === 0 ? 'ราคาเดิม' : delta > 0 ? `+฿${delta}` : `-฿${Math.abs(delta)}`}
+                        </span>
+                      </Label>
+                    );
+                  })}
+                </RadioGroup>
+              </div>
+            )}
+
             {/* Sweetness */}
             <div className="space-y-2.5 rounded-xl border border-border/60 bg-card/90 p-3 shadow-sm sm:space-y-3 sm:p-4">
               <div>
