@@ -8,6 +8,7 @@ export interface CartItem {
   basePrice: number;
   sweetness: string;
   toppings: string[];
+  variation?: string;
   quantity: number;
   totalPrice: number;
 }
