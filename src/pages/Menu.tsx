@@ -34,6 +34,8 @@ interface DbProduct {
   image_url: string | null;
   category: 'drink' | 'dessert';
   order_count: number;
+  images?: string[] | null;
+  variants?: { label: string; image_url?: string; price_delta?: number }[] | null;
 }
 
 const Menu = () => {
@@ -47,7 +49,7 @@ const Menu = () => {
     (async () => {
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, price, image_url, category, order_count')
+        .select('id, name, price, image_url, category, order_count, images, variants')
         .order('order_count', { ascending: false });
       if (!cancelled) {
         if (error) console.error(error);
@@ -72,6 +74,12 @@ const Menu = () => {
     name: p.name,
     price: Number(p.price),
     image: p.image_url || fallbackImage(p.name),
+    images: (p.images ?? []).filter(Boolean),
+    variations: (p.variants ?? []).map((v: any) => ({
+      label: v.label,
+      image_url: v.image_url,
+      price_delta: v.price_delta ? Number(v.price_delta) : 0,
+    })),
     category: p.category,
     order_count: p.order_count,
   });
