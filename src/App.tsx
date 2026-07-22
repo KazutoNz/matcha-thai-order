@@ -24,6 +24,7 @@ import Products from "@/pages/admin/Products";
 import Users from "@/pages/admin/Users";
 import Deliveries from "@/pages/rider/Deliveries";
 import NotFound from "@/pages/NotFound";
+import OAuthConsent from "@/pages/OAuthConsent";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
                 <Route path="/register" element={<Register />} />
                 <Route path="/profile" element={<Profile />} />
               </Route>
+              <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
               <Route element={<StaffGuard />}>
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<Dashboard />} />
