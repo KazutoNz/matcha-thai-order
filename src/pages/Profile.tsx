@@ -86,8 +86,8 @@ const Profile = () => {
   return (
     <div className="container max-w-3xl py-10">
       <Card className="overflow-hidden border-border/70 shadow-lg">
-        <div className="relative bg-card p-8 border-b">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.08),transparent_60%)]" />
+        <div className="relative bg-gradient-to-br from-primary/5 via-card to-card p-8 border-b">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.12),transparent_60%)]" />
           <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-5">
               <Avatar className="h-20 w-20 border-2 border-primary/20">
@@ -194,8 +194,8 @@ const Profile = () => {
 };
 
 const InfoRow = ({ icon: Icon, label, value, mono, highlight }: { icon: any; label: string; value: string; mono?: boolean; highlight?: boolean }) => (
-  <div className="flex items-start gap-3 rounded-xl border bg-card/50 p-4">
-    <div className="mt-0.5 rounded-lg bg-primary/10 p-2 text-primary">
+  <div className="flex items-start gap-3 rounded-xl border bg-card/50 p-4 transition-colors hover:bg-card hover:border-primary/30">
+    <div className="mt-0.5 rounded-lg bg-primary/10 p-2 text-primary transition-transform group-hover:scale-110">
       <Icon className="h-4 w-4" />
     </div>
     <div className="min-w-0 flex-1">

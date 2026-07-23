@@ -5,6 +5,18 @@ import { STATUS_LABEL } from '@/lib/order-status';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer, Legend,
 } from 'recharts';
+import { Package, CheckCircle2, ChefHat, Truck, PackageCheck, Clock, ShoppingBag, Wallet } from 'lucide-react';
+
+const cards = [
+  { label: 'ออเดอร์ทั้งหมด', value: stats.total, icon: Package },
+  { label: STATUS_LABEL.confirmed, value: stats.confirmed, color: 'text-cyan-600', icon: CheckCircle2 },
+  { label: STATUS_LABEL.preparing, value: stats.preparing, color: 'text-blue-600', icon: ChefHat },
+  { label: STATUS_LABEL.out_for_delivery, value: stats.out_for_delivery, color: 'text-orange-600', icon: Truck },
+  { label: STATUS_LABEL.delivered, value: stats.delivered, color: 'text-emerald-600', icon: PackageCheck },
+  { label: STATUS_LABEL.pending, value: stats.pending, color: 'text-yellow-600', icon: Clock },
+  { label: STATUS_LABEL.ready, value: stats.ready, color: 'text-purple-600', icon: ShoppingBag },
+  { label: 'รายได้รวม', value: fmtTHB(stats.revenue), color: 'text-primary', icon: Wallet },
+];
 
 const fmtTHB = (n: number) => `฿${n.toLocaleString('th-TH')}`;
 
@@ -92,8 +104,11 @@ const Dashboard = () => {
         <h2 className="mb-4 text-xl font-bold">ภาพรวม</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {cards.map((s) => (
-            <div key={s.label} className="rounded-lg border bg-card p-4">
-              <p className="text-sm text-muted-foreground">{s.label}</p>
+            <div key={s.label} className="group rounded-xl border bg-card p-4 transition-shadow hover:shadow-md">
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">{s.label}</p>
+                <s.icon className={`h-4 w-4 ${s.color || 'text-muted-foreground'} opacity-70`} />
+              </div>
               <p className={`text-2xl font-bold ${s.color || ''}`}>{s.value}</p>
             </div>
           ))}
