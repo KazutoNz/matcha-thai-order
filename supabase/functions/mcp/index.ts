@@ -134,18 +134,187 @@ var get_my_profile_default = defineTool4({
   }
 });
 
+// src/lib/mcp/tools/create-product.ts
+import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.24.0";
+import { z as z4 } from "npm:zod@^4.4.3";
+
+// src/lib/mcp/tools/_helpers.ts
+import { createClient as createClient5 } from "npm:@supabase/supabase-js@^2.105.4";
+function supabaseForUser5(ctx) {
+  return createClient5(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY, {
+    global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
+}
+async function assertAdminOrManager(ctx) {
+  if (!ctx.isAuthenticated()) return "Not authenticated";
+  const client = supabaseForUser5(ctx);
+  const uid = ctx.getUserId();
+  const { data, error } = await client.from("user_roles").select("role").eq("user_id", uid);
+  if (error) return error.message;
+  const roles = (data ?? []).map((r) => r.role);
+  if (!roles.includes("admin") && !roles.includes("manager")) {
+    return "Forbidden: admin or manager role required";
+  }
+  return null;
+}
+
+// src/lib/mcp/tools/create-product.ts
+var variantSchema = z4.object({
+  name: z4.string().describe("Variant label, e.g. 'Standard' or 'Mint'."),
+  price_delta: z4.number().describe("Price adjustment applied on top of base price (can be 0 or negative).")
+});
+var create_product_default = defineTool5({
+  name: "create_product",
+  title: "Create product",
+  description: "Create a new MatchaMew menu item. Admin or manager only. Supports multiple images and variants.",
+  inputSchema: {
+    name: z4.string().min(1).describe("Product name (Thai or English)."),
+    price: z4.number().nonnegative().describe("Base price in THB."),
+    category: z4.enum(["drink", "dessert"]).describe("Menu category."),
+    image_url: z4.string().url().optional().describe("Primary image URL (falls back to first of images)."),
+    images: z4.array(z4.string().url()).optional().describe("Gallery of image URLs."),
+    variants: z4.array(variantSchema).optional().describe("Optional product variants with price deltas.")
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
+  handler: async (input, ctx) => {
+    const forbidden = await assertAdminOrManager(ctx);
+    if (forbidden) return { content: [{ type: "text", text: forbidden }], isError: true };
+    const images = input.images ?? (input.image_url ? [input.image_url] : []);
+    const image_url = input.image_url ?? images[0] ?? null;
+    const { data, error } = await supabaseForUser5(ctx).from("products").insert({
+      name: input.name,
+      price: input.price,
+      category: input.category,
+      image_url,
+      images,
+      variants: input.variants ?? []
+    }).select().maybeSingle();
+    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    return {
+      content: [{ type: "text", text: JSON.stringify(data) }],
+      structuredContent: { product: data }
+    };
+  }
+});
+
+// src/lib/mcp/tools/update-product.ts
+import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.24.0";
+import { z as z5 } from "npm:zod@^4.4.3";
+var variantSchema2 = z5.object({
+  name: z5.string(),
+  price_delta: z5.number()
+});
+var update_product_default = defineTool6({
+  name: "update_product",
+  title: "Update product",
+  description: "Update fields of an existing MatchaMew product. Admin or manager only. Only provided fields are changed.",
+  inputSchema: {
+    product_id: z5.string().uuid().describe("Product UUID."),
+    name: z5.string().min(1).optional(),
+    price: z5.number().nonnegative().optional(),
+    category: z5.enum(["drink", "dessert"]).optional(),
+    image_url: z5.string().url().nullable().optional().describe("Primary image URL, or null to clear."),
+    images: z5.array(z5.string().url()).optional().describe("Replace the gallery of image URLs."),
+    variants: z5.array(variantSchema2).optional().describe("Replace the variants list.")
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
+  handler: async ({ product_id, ...rest }, ctx) => {
+    const forbidden = await assertAdminOrManager(ctx);
+    if (forbidden) return { content: [{ type: "text", text: forbidden }], isError: true };
+    const patch = {};
+    for (const [k, v] of Object.entries(rest)) {
+      if (v !== void 0) patch[k] = v;
+    }
+    if (Object.keys(patch).length === 0) {
+      return { content: [{ type: "text", text: "No fields to update" }], isError: true };
+    }
+    const { data, error } = await supabaseForUser5(ctx).from("products").update(patch).eq("id", product_id).select().maybeSingle();
+    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    if (!data) return { content: [{ type: "text", text: "Product not found" }], isError: true };
+    return {
+      content: [{ type: "text", text: JSON.stringify(data) }],
+      structuredContent: { product: data }
+    };
+  }
+});
+
+// src/lib/mcp/tools/delete-product.ts
+import { defineTool as defineTool7 } from "npm:@lovable.dev/mcp-js@0.24.0";
+import { z as z6 } from "npm:zod@^4.4.3";
+var delete_product_default = defineTool7({
+  name: "delete_product",
+  title: "Delete product",
+  description: "Delete a MatchaMew product by ID. Admin or manager only. This is irreversible.",
+  inputSchema: {
+    product_id: z6.string().uuid().describe("Product UUID to delete.")
+  },
+  annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ product_id }, ctx) => {
+    const forbidden = await assertAdminOrManager(ctx);
+    if (forbidden) return { content: [{ type: "text", text: forbidden }], isError: true };
+    const { error } = await supabaseForUser5(ctx).from("products").delete().eq("id", product_id);
+    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    return {
+      content: [{ type: "text", text: `Product ${product_id} deleted.` }],
+      structuredContent: { deleted_id: product_id }
+    };
+  }
+});
+
+// src/lib/mcp/tools/add-product-image.ts
+import { defineTool as defineTool8 } from "npm:@lovable.dev/mcp-js@0.24.0";
+import { z as z7 } from "npm:zod@^4.4.3";
+var add_product_image_default = defineTool8({
+  name: "add_product_image",
+  title: "Add product image",
+  description: "Append an image URL to a product's gallery. Admin or manager only.",
+  inputSchema: {
+    product_id: z7.string().uuid(),
+    image_url: z7.string().url().describe("Image URL to append to the gallery."),
+    set_as_primary: z7.boolean().optional().describe("If true, also set this URL as the primary image_url.")
+  },
+  annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
+  handler: async ({ product_id, image_url, set_as_primary }, ctx) => {
+    const forbidden = await assertAdminOrManager(ctx);
+    if (forbidden) return { content: [{ type: "text", text: forbidden }], isError: true };
+    const client = supabaseForUser5(ctx);
+    const { data: current, error: readErr } = await client.from("products").select("images,image_url").eq("id", product_id).maybeSingle();
+    if (readErr) return { content: [{ type: "text", text: readErr.message }], isError: true };
+    if (!current) return { content: [{ type: "text", text: "Product not found" }], isError: true };
+    const nextImages = [...current.images ?? [], image_url];
+    const patch = { images: nextImages };
+    if (set_as_primary || !current.image_url) patch.image_url = image_url;
+    const { data, error } = await client.from("products").update(patch).eq("id", product_id).select().maybeSingle();
+    if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    return {
+      content: [{ type: "text", text: JSON.stringify(data) }],
+      structuredContent: { product: data }
+    };
+  }
+});
+
 // src/lib/mcp/index.ts
 var projectRef = "vmyvtfecbwkkqnlnqgfj";
 var mcp_default = defineMcp({
   name: "matchamew-mcp",
   title: "MatchaMew",
-  version: "0.1.0",
-  instructions: "Tools for MatchaMew, a Thai matcha cafe ordering app. Use list_menu to browse products, list_my_orders and get_order to inspect the signed-in user's orders, and get_my_profile for their reward points and default delivery info.",
+  version: "0.2.0",
+  instructions: "Tools for MatchaMew, a Thai matcha cafe ordering app. Customers: use list_menu to browse products, list_my_orders and get_order to inspect the signed-in user's orders, and get_my_profile for reward points and default delivery info. Admins/managers can manage the menu with create_product, update_product, delete_product, and add_product_image (supports multiple images and variants with price deltas).",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated"
   }),
-  tools: [list_menu_default, list_my_orders_default, get_order_default, get_my_profile_default]
+  tools: [
+    list_menu_default,
+    list_my_orders_default,
+    get_order_default,
+    get_my_profile_default,
+    create_product_default,
+    update_product_default,
+    delete_product_default,
+    add_product_image_default
+  ]
 });
 
 // lovable-mcp-supabase-entry.ts

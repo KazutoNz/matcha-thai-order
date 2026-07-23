@@ -12,7 +12,7 @@
   "mcp": {
     "server": {
       "name": "matchamew-mcp",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "MatchaMew"
     },
     "tools": [
@@ -103,6 +103,222 @@
           "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_product",
+        "title": "Create product",
+        "description": "Create a new MatchaMew menu item. Admin or manager only. Supports multiple images and variants.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Product name (Thai or English)."
+            },
+            "price": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Base price in THB."
+            },
+            "category": {
+              "type": "string",
+              "enum": [
+                "drink",
+                "dessert"
+              ],
+              "description": "Menu category."
+            },
+            "image_url": {
+              "description": "Primary image URL (falls back to first of images).",
+              "type": "string",
+              "format": "uri"
+            },
+            "images": {
+              "description": "Gallery of image URLs.",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "variants": {
+              "description": "Optional product variants with price deltas.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Variant label, e.g. 'Standard' or 'Mint'."
+                  },
+                  "price_delta": {
+                    "type": "number",
+                    "description": "Price adjustment applied on top of base price (can be 0 or negative)."
+                  }
+                },
+                "required": [
+                  "name",
+                  "price_delta"
+                ]
+              }
+            }
+          },
+          "required": [
+            "name",
+            "price",
+            "category"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_product",
+        "title": "Update product",
+        "description": "Update fields of an existing MatchaMew product. Admin or manager only. Only provided fields are changed.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "product_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Product UUID."
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "price": {
+              "type": "number",
+              "minimum": 0
+            },
+            "category": {
+              "type": "string",
+              "enum": [
+                "drink",
+                "dessert"
+              ]
+            },
+            "image_url": {
+              "description": "Primary image URL, or null to clear.",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uri"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "images": {
+              "description": "Replace the gallery of image URLs.",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "variants": {
+              "description": "Replace the variants list.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "price_delta": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "name",
+                  "price_delta"
+                ]
+              }
+            }
+          },
+          "required": [
+            "product_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "delete_product",
+        "title": "Delete product",
+        "description": "Delete a MatchaMew product by ID. Admin or manager only. This is irreversible.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "product_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Product UUID to delete."
+            }
+          },
+          "required": [
+            "product_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "add_product_image",
+        "title": "Add product image",
+        "description": "Append an image URL to a product's gallery. Admin or manager only.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "product_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "image_url": {
+              "type": "string",
+              "format": "uri",
+              "description": "Image URL to append to the gallery."
+            },
+            "set_as_primary": {
+              "description": "If true, also set this URL as the primary image_url.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "product_id",
+            "image_url"
+          ]
         },
         "outputSchema": null
       }
