@@ -19,7 +19,6 @@ const categories = [
   { id: 'dessert', label: 'ของหวาน' },
 ];
 
-// Pick a fallback image when DB row has no image_url yet
 const FALLBACKS = [productLatte, productFrappe, productCheesecake, productSoftserve, productMochi, productSmoothie];
 const fallbackImage = (name: string) => {
   let h = 0;
@@ -60,7 +59,6 @@ const Menu = () => {
     return () => { cancelled = true; };
   }, []);
 
-  // Top 3 most ordered are "best sellers"
   const bestSellerIds = useMemo(() => {
     return new Set(
       [...items].sort((a, b) => b.order_count - a.order_count).slice(0, 3).map((p) => p.id)
@@ -85,82 +83,84 @@ const Menu = () => {
   });
 
   return (
-  <div className="container py-8">
-    {/* Hero */}
-    <div className="mb-10 text-center">
-      <span className="mb-2 inline-block rounded-full bg-primary/10 px-4 py-1 text-xs font-medium text-primary">
-        🍵 เมนูมัทฉะพรีเมียม
-      </span>
-      <h1 className="text-3xl font-bold sm:text-4xl">เมนูของเรา</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        คัดสรรวัตถุดิบคุณภาพ เสิร์ฟสดใหม่ทุกแก้ว
-      </p>
-    </div>
+    <div className="container py-8">
+      <div className="mb-10 text-center">
+        <span className="mb-2 inline-block rounded-full bg-primary/10 px-4 py-1 text-xs font-medium text-primary">
+          🍵 เมนูมัทฉะพรีเมียม
+        </span>
+        <h1 className="text-3xl font-bold sm:text-4xl">เมนูของเรา</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          คัดสรรวัตถุดิบคุณภาพ เสิร์ฟสดใหม่ทุกแก้ว
+        </p>
+      </div>
 
-    <div className="flex flex-col gap-8 lg:flex-row">
-      <aside className="lg:sticky lg:top-20 lg:h-fit lg:w-52 shrink-0">
-        <nav className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:gap-1.5 lg:pb-0" aria-label="หมวดหมู่">
-          {categories.map((cat) => {
-            const count = cat.id === 'all' ? items.length : items.filter(p => p.category === cat.id).length;
-            return (
+      <div className="flex flex-col gap-8 lg:flex-row">
+        <aside className="lg:sticky lg:top-20 lg:h-fit lg:w-52 shrink-0">
+          <nav className="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:gap-1.5 lg:pb-0" aria-label="หมวดหมู่">
+            {categories.map((cat) => {
+              const count = cat.id === 'all' ? items.length : items.filter((p) => p.category === cat.id).length;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={cn(
+                    'flex items-center justify-between whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all',
+                    activeCategory === cat.id
+                      ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
+                      : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                  )}
+                >
+                  <span>{cat.label}</span>
+                  <span
+                    className={cn(
+                      'ml-2 rounded-full px-1.5 text-xs',
+                      activeCategory === cat.id ? 'bg-white/20' : 'bg-background'
+                    )}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
+
+        <div className="flex-1">
+          {loading ? (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="aspect-[3/4] w-full rounded-xl" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {filtered.map((p, i) => (
+                <ProductCard
+                  key={p.id}
+                  product={toProduct(p)}
+                  onClick={openProduct}
+                  index={i}
+                  isBestSeller={bestSellerIds.has(p.id)}
+                />
+              ))}
+            </div>
+          )}
+          {!loading && filtered.length === 0 && (
+            <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed py-20 text-center">
+              <span className="text-4xl">🍡</span>
+              <p className="font-medium text-muted-foreground">ไม่มีสินค้าในหมวดหมู่นี้</p>
               <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={cn(
-                  'flex items-center justify-between whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all',
-                  activeCategory === cat.id
-                    ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
-                    : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-                )}
+                onClick={() => setActiveCategory('all')}
+                className="text-sm text-primary underline underline-offset-4"
               >
-                <span>{cat.label}</span>
-                <span className={cn(
-                  'ml-2 rounded-full px-1.5 text-xs',
-                  activeCategory === cat.id ? 'bg-white/20' : 'bg-background'
-                )}>
-                  {count}
-                </span>
+                ดูเมนูทั้งหมด
               </button>
-            );
-          })}
-        </nav>
-      </aside>
-
-      <div className="flex-1">
-        {loading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="aspect-[3/4] w-full rounded-xl" />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {filtered.map((p, i) => (
-              <ProductCard
-                key={p.id}
-                product={toProduct(p)}
-                onClick={openProduct}
-                index={i}
-                isBestSeller={bestSellerIds.has(p.id)}
-              />
-            ))}
-          </div>
-        )}
-        {!loading && filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed py-20 text-center">
-            <span className="text-4xl">🍡</span>
-            <p className="font-medium text-muted-foreground">ไม่มีสินค้าในหมวดหมู่นี้</p>
-            <button
-              onClick={() => setActiveCategory('all')}
-              className="text-sm text-primary underline underline-offset-4"
-            >
-              ดูเมนูทั้งหมด
-            </button>
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default Menu;
