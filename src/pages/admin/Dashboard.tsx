@@ -7,18 +7,8 @@ import {
 } from 'recharts';
 import { Package, CheckCircle2, ChefHat, Truck, PackageCheck, Clock, ShoppingBag, Wallet } from 'lucide-react';
 
-const cards = [
-  { label: 'ออเดอร์ทั้งหมด', value: stats.total, icon: Package },
-  { label: STATUS_LABEL.confirmed, value: stats.confirmed, color: 'text-cyan-600', icon: CheckCircle2 },
-  { label: STATUS_LABEL.preparing, value: stats.preparing, color: 'text-blue-600', icon: ChefHat },
-  { label: STATUS_LABEL.out_for_delivery, value: stats.out_for_delivery, color: 'text-orange-600', icon: Truck },
-  { label: STATUS_LABEL.delivered, value: stats.delivered, color: 'text-emerald-600', icon: PackageCheck },
-  { label: STATUS_LABEL.pending, value: stats.pending, color: 'text-yellow-600', icon: Clock },
-  { label: STATUS_LABEL.ready, value: stats.ready, color: 'text-purple-600', icon: ShoppingBag },
-  { label: 'รายได้รวม', value: fmtTHB(stats.revenue), color: 'text-primary', icon: Wallet },
-];
-
 const fmtTHB = (n: number) => `฿${n.toLocaleString('th-TH')}`;
+
 
 const Dashboard = () => {
   const { orders, loading } = useOrders({ all: true });
@@ -79,6 +69,17 @@ const Dashboard = () => {
     return [...map.values()].sort((a, b) => b.qty - a.qty).slice(0, 5);
   }, [orders]);
 
+  const cards = [
+    { label: 'ออเดอร์ทั้งหมด', value: stats.total, icon: Package, color: 'text-foreground' },
+    { label: STATUS_LABEL.confirmed, value: stats.confirmed, color: 'text-cyan-600', icon: CheckCircle2 },
+    { label: STATUS_LABEL.preparing, value: stats.preparing, color: 'text-blue-600', icon: ChefHat },
+    { label: STATUS_LABEL.out_for_delivery, value: stats.out_for_delivery, color: 'text-orange-600', icon: Truck },
+    { label: STATUS_LABEL.delivered, value: stats.delivered, color: 'text-emerald-600', icon: PackageCheck },
+    { label: STATUS_LABEL.pending, value: stats.pending, color: 'text-yellow-600', icon: Clock },
+    { label: STATUS_LABEL.ready, value: stats.ready, color: 'text-purple-600', icon: ShoppingBag },
+    { label: 'รายได้รวม', value: fmtTHB(stats.revenue), color: 'text-primary', icon: Wallet },
+  ];
+
   if (loading) {
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -87,16 +88,6 @@ const Dashboard = () => {
     );
   }
 
-  const cards = [
-    { label: 'ออเดอร์ทั้งหมด', value: stats.total },
-    { label: STATUS_LABEL.confirmed, value: stats.confirmed, color: 'text-cyan-600' },
-    { label: STATUS_LABEL.preparing, value: stats.preparing, color: 'text-blue-600' },
-    { label: STATUS_LABEL.out_for_delivery, value: stats.out_for_delivery, color: 'text-orange-600' },
-    { label: STATUS_LABEL.delivered, value: stats.delivered, color: 'text-emerald-600' },
-    { label: STATUS_LABEL.pending, value: stats.pending, color: 'text-yellow-600' },
-    { label: STATUS_LABEL.ready, value: stats.ready, color: 'text-purple-600' },
-    { label: 'รายได้รวม', value: fmtTHB(stats.revenue), color: 'text-primary' },
-  ];
 
   return (
     <div className="space-y-8">
