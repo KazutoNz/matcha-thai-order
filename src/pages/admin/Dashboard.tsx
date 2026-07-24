@@ -80,6 +80,7 @@ const Dashboard = () => {
     { label: 'รายได้รวม', value: fmtTHB(stats.revenue), color: 'text-primary', icon: Wallet },
   ];
 
+  if (loading) {
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
@@ -87,16 +88,6 @@ const Dashboard = () => {
     );
   }
 
-  const cards = [
-    { label: 'ออเดอร์ทั้งหมด', value: stats.total },
-    { label: STATUS_LABEL.confirmed, value: stats.confirmed, color: 'text-cyan-600' },
-    { label: STATUS_LABEL.preparing, value: stats.preparing, color: 'text-blue-600' },
-    { label: STATUS_LABEL.out_for_delivery, value: stats.out_for_delivery, color: 'text-orange-600' },
-    { label: STATUS_LABEL.delivered, value: stats.delivered, color: 'text-emerald-600' },
-    { label: STATUS_LABEL.pending, value: stats.pending, color: 'text-yellow-600' },
-    { label: STATUS_LABEL.ready, value: stats.ready, color: 'text-purple-600' },
-    { label: 'รายได้รวม', value: fmtTHB(stats.revenue), color: 'text-primary' },
-  ];
 
   return (
     <div className="space-y-8">
