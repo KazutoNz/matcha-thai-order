@@ -18,6 +18,40 @@ import { toast } from 'sonner';
 const toppingNameMap: Record<string, string> = {};
 toppings.forEach((t) => (toppingNameMap[t.id] = t.name));
 
+const OrderCard = ({
+  order, statusMenu, lines,
+}: { order: any; statusMenu: React.ReactNode; lines: React.ReactNode[] }) => {
+  const [expanded, setExpanded] = useState(false);
+  const collapsible = lines.length > 2;
+  const visible = expanded || !collapsible ? lines : lines.slice(0, 2);
+  return (
+    <div className="rounded-xl border bg-card p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-2">
+        <span className="font-mono text-xs text-muted-foreground">#{order.id.slice(0, 8)}</span>
+        <span className="text-right text-xs text-muted-foreground">
+          {new Date(order.created_at).toLocaleString('th-TH')}
+        </span>
+      </div>
+      <div className="mt-3 space-y-1 text-sm leading-relaxed break-words">{visible}</div>
+      {collapsible && (
+        <Button
+          variant="link"
+          size="sm"
+          className="h-auto px-0 text-xs"
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded ? 'ย่อลง' : `ดูเพิ่มเติม (+${lines.length - 2})`}
+        </Button>
+      )}
+      <div className="mt-3 flex items-center justify-end gap-3 border-t pt-3">
+        <span className="font-bold">฿{Number(order.total)}</span>
+        {statusMenu}
+      </div>
+    </div>
+  );
+};
+
+
 const Orders = () => {
   const { orders, loading, refresh } = useOrders({ all: true });
 
