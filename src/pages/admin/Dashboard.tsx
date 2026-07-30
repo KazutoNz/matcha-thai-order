@@ -82,7 +82,7 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
       </div>
     );
@@ -90,48 +90,55 @@ const Dashboard = () => {
 
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <h2 className="mb-4 text-xl font-bold">ภาพรวม</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <h2 className="mb-3 text-lg font-bold sm:mb-4 sm:text-xl">ภาพรวม</h2>
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {cards.map((s) => (
-            <div key={s.label} className="group rounded-xl border bg-card p-4 transition-shadow hover:shadow-md">
-              <div className="mb-2 flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">{s.label}</p>
-                <s.icon className={`h-4 w-4 ${s.color || 'text-muted-foreground'} opacity-70`} />
+            <div key={s.label} className="group flex h-full min-h-[92px] flex-col justify-between rounded-xl border bg-card p-3 transition-shadow hover:shadow-md sm:p-4">
+              <div className="mb-2 flex items-start justify-between gap-2">
+                <p className="text-xs leading-snug text-muted-foreground sm:text-sm">{s.label}</p>
+                <s.icon className={`h-4 w-4 shrink-0 ${s.color || 'text-muted-foreground'} opacity-70`} />
               </div>
-              <p className={`text-2xl font-bold ${s.color || ''}`}>{s.value}</p>
+              <p className={`truncate text-xl font-bold sm:text-2xl ${s.color || ''}`}>{s.value}</p>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-lg border bg-card p-4">
-          <h3 className="mb-3 font-semibold">ยอดขาย 7 วันล่าสุด</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <LineChart data={dailyData}>
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+        <div className="rounded-lg border bg-card p-3 sm:p-4">
+          <h3 className="mb-3 text-sm font-semibold sm:text-base">ยอดขาย 7 วันล่าสุด</h3>
+          <ResponsiveContainer width="100%" height={240}>
+            <LineChart data={dailyData} margin={{ top: 5, right: 8, left: -18, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
+              <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} width={44} />
               <Tooltip
                 contentStyle={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: 8 }}
                 formatter={(v: any, n: any) => n === 'revenue' ? [fmtTHB(Number(v)), 'รายได้'] : [v, 'จำนวนออเดอร์']}
               />
-              <Legend formatter={(v) => v === 'revenue' ? 'รายได้' : 'จำนวนออเดอร์'} />
+              <Legend wrapperStyle={{ fontSize: 12 }} formatter={(v) => v === 'revenue' ? 'รายได้' : 'จำนวนออเดอร์'} />
               <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2.5} />
               <Line type="monotone" dataKey="orders" stroke="hsl(var(--accent-foreground))" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="rounded-lg border bg-card p-4">
-          <h3 className="mb-3 font-semibold">เมนูยอดนิยม (Top 5)</h3>
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={topMenus}>
+        <div className="rounded-lg border bg-card p-3 sm:p-4">
+          <h3 className="mb-3 text-sm font-semibold sm:text-base">เมนูยอดนิยม (Top 5)</h3>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={topMenus} margin={{ top: 5, right: 8, left: -18, bottom: 40 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} />
-              <YAxis tick={{ fontSize: 12 }} />
+              <XAxis
+                dataKey="name"
+                tick={{ fontSize: 10 }}
+                interval={0}
+                angle={-30}
+                textAnchor="end"
+                height={50}
+              />
+              <YAxis tick={{ fontSize: 11 }} width={44} allowDecimals={false} />
               <Tooltip
                 contentStyle={{ background: 'hsl(var(--popover))', border: '1px solid hsl(var(--border))', borderRadius: 8 }}
                 formatter={(v: any) => [v, 'จำนวน']}
@@ -142,10 +149,10 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="rounded-lg border bg-card p-4">
-        <h3 className="mb-3 font-semibold">สรุปยอดขายรายวัน</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+      <div className="rounded-lg border bg-card p-3 sm:p-4">
+        <h3 className="mb-3 text-sm font-semibold sm:text-base">สรุปยอดขายรายวัน</h3>
+        <div className="-mx-3 overflow-x-auto px-3 sm:mx-0 sm:px-0">
+          <table className="w-full min-w-[320px] text-sm">
             <thead className="text-muted-foreground">
               <tr className="border-b">
                 <th className="py-2 text-left">วันที่</th>
@@ -156,7 +163,7 @@ const Dashboard = () => {
             <tbody>
               {dailyData.map((d) => (
                 <tr key={d.date} className="border-b last:border-0">
-                  <td className="py-2">{d.label}</td>
+                  <td className="py-2 whitespace-nowrap">{d.label}</td>
                   <td className="py-2 text-right">{d.orders}</td>
                   <td className="py-2 text-right font-semibold text-primary">{fmtTHB(d.revenue)}</td>
                 </tr>
@@ -168,5 +175,6 @@ const Dashboard = () => {
     </div>
   );
 };
+
 
 export default Dashboard;
