@@ -18,6 +18,7 @@ import Orders from "@/pages/Orders";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Profile from "@/pages/Profile";
+import ResetPassword from "@/pages/ResetPassword";
 import Dashboard from "@/pages/admin/Dashboard";
 import AdminOrders from "@/pages/admin/Orders";
 import Products from "@/pages/admin/Products";
@@ -55,6 +56,7 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
               </Route>
               <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
               <Route element={<StaffGuard />}>
