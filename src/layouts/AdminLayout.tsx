@@ -65,16 +65,16 @@ const AdminLayout = () => {
       <div className="flex min-h-screen w-full">
         <AdminSidebar />
         <div className="flex-1 flex flex-col">
-          <header className="flex h-14 items-center gap-3 border-b px-4">
+          <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur sm:gap-3 sm:px-4">
             <SidebarTrigger />
-            <h1 className="text-lg font-bold">แดชบอร์ดผู้ดูแลระบบ</h1>
+            <h1 className="truncate text-base font-bold sm:text-lg">แดชบอร์ดผู้ดูแลระบบ</h1>
             <div className="ml-auto">
               <Button asChild variant="outline" size="sm" className="rounded-full">
-                <Link to="/"><HomeIcon className="mr-1 h-4 w-4" /> กลับหน้าหลัก</Link>
+                <Link to="/"><HomeIcon className="h-4 w-4 sm:mr-1" /> <span className="hidden sm:inline">กลับหน้าหลัก</span></Link>
               </Button>
             </div>
           </header>
-          <main className="flex-1 overflow-auto p-6">
+          <main className="flex-1 overflow-auto p-3 sm:p-6">
             <Outlet />
           </main>
         </div>
