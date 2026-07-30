@@ -152,8 +152,56 @@ const Products = () => {
         </Button>
       </div>
 
-      <div className="rounded-lg border">
+      {/* Mobile: card list */}
+      <div className="space-y-3 md:hidden">
+        {loading ? (
+          <div className="py-8 text-center"><Loader2 className="inline h-5 w-5 animate-spin" /></div>
+        ) : items.length === 0 ? (
+          <p className="py-8 text-center text-muted-foreground">ยังไม่มีสินค้า</p>
+        ) : items.map((p) => (
+          <div key={p.id} className="rounded-xl border bg-card p-4 shadow-sm">
+            <div className="flex items-start gap-3">
+              {p.image_url ? (
+                <img src={p.image_url} alt={p.name} className="h-14 w-14 shrink-0 rounded-md object-cover" />
+              ) : (
+                <div className="h-14 w-14 shrink-0 rounded-md bg-muted" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium">{p.name}</p>
+                <div className="mt-1 flex flex-wrap items-center gap-1">
+                  <Badge variant="secondary" className="text-[10px]">
+                    {p.category === 'drink' ? 'เครื่องดื่ม' : 'ของหวาน'}
+                  </Badge>
+                  {p.variants?.slice(0, 3).map((v, i) => (
+                    <Badge key={i} variant="outline" className="text-[10px]">{v.label || `แบบ ${i + 1}`}</Badge>
+                  ))}
+                  {p.variants?.length > 3 && (
+                    <Badge variant="outline" className="text-[10px]">+{p.variants.length - 3}</Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between border-t pt-3">
+              <div className="text-sm">
+                <span className="font-bold">฿{p.price}</span>
+                <span className="ml-3 text-xs text-muted-foreground">ขายแล้ว {p.order_count}</span>
+              </div>
+              <div className="flex gap-1">
+                <Button size="icon" variant="ghost" onClick={() => openEdit(p)}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button size="icon" variant="ghost" onClick={() => handleDelete(p.id)}>
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="hidden rounded-lg border md:block">
         <Table>
+
           <TableHeader>
             <TableRow>
               <TableHead>รูปภาพ</TableHead>
