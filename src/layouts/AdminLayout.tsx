@@ -64,7 +64,7 @@ const AdminLayout = () => {
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         <AdminSidebar />
-        <div className="flex-1 flex flex-col">
+        <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-background/95 px-3 backdrop-blur sm:gap-3 sm:px-4">
             <SidebarTrigger />
             <h1 className="truncate text-base font-bold sm:text-lg">แดชบอร์ดผู้ดูแลระบบ</h1>
