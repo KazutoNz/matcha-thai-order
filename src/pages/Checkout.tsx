@@ -72,7 +72,15 @@ const Checkout = () => {
     try {
       const { data: order, error } = await supabase
         .from('orders')
-        .insert({ user_id: user.id, total: totalPrice, status: 'pending' })
+        .insert({
+          user_id: user.id,
+          total: totalPrice,
+          status: 'pending',
+          customer_name: name.trim(),
+          customer_phone: phone.trim(),
+          delivery_address: address.trim(),
+          payment_method: payment,
+        })
         .select()
         .single();
       if (error || !order) throw error || new Error('ไม่สามารถสร้างออเดอร์ได้');

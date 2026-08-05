@@ -62,26 +62,44 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          customer_name: string
+          customer_phone: string
+          delivery_address: string
           id: string
+          note: string | null
+          payment_method: string
           rider_id: string | null
           status: Database["public"]["Enums"]["order_status"]
           total: number
+          updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          customer_name: string
+          customer_phone: string
+          delivery_address: string
           id?: string
+          note?: string | null
+          payment_method?: string
           rider_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           total: number
+          updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
+          customer_name?: string
+          customer_phone?: string
+          delivery_address?: string
           id?: string
+          note?: string | null
+          payment_method?: string
           rider_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           total?: number
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
